@@ -1,0 +1,2743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trainer Performance Dashboard - Educate!</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+        
+        /* Header */
+        .header { background: #1e293b; padding: 16px 24px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .header h1 { color: #f97316; font-size: 24px; }
+        .header-subtitle { color: #94a3b8; font-size: 14px; }
+        .header-stats { display: flex; gap: 16px; }
+        .stat-card { background: #0f172a; padding: 12px 16px; border-radius: 8px; border-left: 4px solid; min-width: 100px; }
+        .stat-value { font-size: 24px; font-weight: bold; }
+        .stat-label { font-size: 12px; color: #94a3b8; }
+        
+        /* Main Layout */
+        .main-container { display: flex; height: calc(100vh - 140px); }
+        
+        /* Sidebar */
+        .sidebar { width: 300px; background: #1e293b; border-right: 1px solid #334155; display: flex; flex-direction: column; overflow: hidden; }
+        .filter-section { padding: 16px; border-bottom: 1px solid #334155; }
+        .filter-title { font-size: 12px; color: #94a3b8; text-transform: uppercase; margin-bottom: 12px; }
+        .filter-select { width: 100%; padding: 10px 12px; margin-bottom: 8px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 14px; cursor: pointer; }
+        .filter-select:hover { border-color: #f97316; }
+        .clear-btn { width: 100%; padding: 8px; background: transparent; border: 1px solid #475569; border-radius: 6px; color: #94a3b8; cursor: pointer; margin-top: 4px; }
+        .clear-btn:hover { background: #334155; }
+        
+        /* Breadcrumb */
+        .breadcrumb { padding: 12px 16px; background: #0f172a; border-bottom: 1px solid #334155; font-size: 13px; color: #94a3b8; }
+        .breadcrumb span { cursor: pointer; }
+        .breadcrumb span:hover { color: #f97316; }
+        .breadcrumb .active { color: #f97316; font-weight: 600; }
+        
+        /* Trainer List */
+        .trainer-list { flex: 1; overflow-y: auto; padding: 16px; }
+        .list-title { font-size: 14px; color: #94a3b8; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .trainer-card { background: #0f172a; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 4px solid #6b7280; cursor: pointer; transition: all 0.2s; }
+        .trainer-card:hover, .trainer-card.selected { background: #334155; transform: translateX(4px); }
+        .trainer-card-name { font-weight: 600; margin-bottom: 4px; font-size: 14px; }
+        .trainer-card-meta { font-size: 11px; color: #94a3b8; }
+        .trainer-card-score { margin-top: 6px; font-size: 16px; font-weight: bold; }
+        
+        /* Main Panel */
+        .main-panel { flex: 1; padding: 24px; overflow-y: auto; }
+        .placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; color: #64748b; }
+        
+        /* View Header */
+        .view-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #1e293b; border-radius: 12px; margin-bottom: 24px; }
+        .view-title { font-size: 24px; font-weight: bold; margin-bottom: 4px; }
+        .view-subtitle { color: #94a3b8; font-size: 14px; }
+        .score-circle { width: 100px; height: 100px; border-radius: 50%; background: #0f172a; border: 4px solid #f97316; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .score-circle-value { font-size: 28px; font-weight: bold; }
+        .score-circle-label { font-size: 11px; color: #94a3b8; }
+        
+        /* Tabs */
+        .tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+        .tab { padding: 10px 20px; background: #1e293b; border: none; border-radius: 8px; color: #94a3b8; cursor: pointer; font-size: 14px; }
+        .tab.active { background: #f97316; color: white; }
+        .tab:hover:not(.active) { background: #334155; }
+        
+        /* Tab Content */
+        .tab-content { background: #1e293b; border-radius: 12px; padding: 20px; }
+        .section { margin-bottom: 24px; }
+        .section:last-child { margin-bottom: 0; }
+        .section-title { font-size: 16px; color: #f97316; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+        .stats-grid-item { background: #0f172a; padding: 16px; border-radius: 8px; text-align: center; }
+        .stats-grid-value { font-size: 28px; font-weight: bold; color: #f97316; }
+        .stats-grid-label { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+        
+        /* Comparison Grid */
+        .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 20px; }
+        .comparison-card { background: #0f172a; padding: 16px; border-radius: 8px; border-left: 4px solid #f97316; }
+        .comparison-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .comparison-icon { font-size: 20px; }
+        .comparison-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; }
+        .comparison-scores { display: flex; align-items: center; gap: 12px; margin: 12px 0; }
+        .comparison-main-score { font-size: 32px; font-weight: bold; }
+        .comparison-vs { color: #64748b; font-size: 14px; }
+        .comparison-compare-score { font-size: 24px; color: #94a3b8; }
+        .comparison-meta { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-top: 8px; }
+        
+        /* Insight Cards */
+        .insight-card { background: #0f172a; padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid; }
+        .insight-card.strength { border-left-color: #10b981; background: #064e3b15; }
+        .insight-card.concern { border-left-color: #ef4444; background: #7f1d1d15; }
+        .insight-card.warning { border-left-color: #f59e0b; background: #78350f15; }
+        .insight-title { font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        .insight-title.strength { color: #10b981; }
+        .insight-title.concern { color: #ef4444; }
+        .insight-title.warning { color: #f59e0b; }
+        .insight-text { font-size: 13px; line-height: 1.6; color: #cbd5e1; }
+        
+        /* Action Steps */
+        .action-step { background: #0f172a; padding: 16px; border-radius: 8px; margin-bottom: 12px; display: flex; gap: 16px; }
+        .step-number { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: white; flex-shrink: 0; }
+        .step-content { flex: 1; }
+        .step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+        .step-priority { font-weight: 600; font-size: 12px; }
+        .step-timeline { font-size: 12px; color: #94a3b8; }
+        .step-focus { font-weight: 600; margin-bottom: 8px; color: #f97316; }
+        .step-actions { background: #1e293b; padding: 12px; border-radius: 6px; margin-top: 8px; }
+        .step-actions-title { font-size: 11px; color: #f97316; font-weight: 600; margin-bottom: 8px; }
+        .step-actions-list { margin-left: 20px; font-size: 13px; line-height: 1.8; }
+        .success-metric { font-size: 12px; color: #10b981; margin-top: 8px; padding: 8px; background: #064e3b15; border-radius: 4px; }
+        
+        /* Competency Bars */
+        .competency-item { display: grid; grid-template-columns: 180px 1fr 60px; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .competency-label { font-size: 13px; }
+        .competency-bar { height: 8px; background: #0f172a; border-radius: 4px; overflow: hidden; }
+        .competency-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+        .competency-score { text-align: right; font-weight: bold; }
+        
+        /* Colors */
+        .score-exceptional { color: #10b981; }
+        .score-strong { color: #22c55e; }
+        .score-adequate { color: #eab308; }
+        .score-developing { color: #f59e0b; }
+        .score-needs-support { color: #ef4444; }
+        
+        .fill-exceptional { background: linear-gradient(90deg, #10b981, #22c55e); }
+        .fill-strong { background: linear-gradient(90deg, #22c55e, #84cc16); }
+        .fill-adequate { background: linear-gradient(90deg, #eab308, #fbbf24); }
+        .fill-developing { background: linear-gradient(90deg, #f59e0b, #fb923c); }
+        .fill-needs-support { background: linear-gradient(90deg, #ef4444, #f87171); }
+        
+        .border-exceptional { border-left-color: #10b981; }
+        .border-strong { border-left-color: #22c55e; }
+        .border-adequate { border-left-color: #eab308; }
+        .border-developing { border-left-color: #f59e0b; }
+        .border-needs-support { border-left-color: #ef4444; }
+        
+        /* Loading */
+        .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px; color: #94a3b8; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #334155; border-top-color: #f97316; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 14px; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container { flex-direction: column; height: auto; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #334155; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .comparison-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="header">
+        <div>
+            <h1>Trainer Performance Dashboard</h1>
+            <div class="header-subtitle">E!BA Bootcamp 2025 • Educate! Uganda</div>
+        </div>
+        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+            <!-- Date Range Filter -->
+            <div style="display: flex; gap: 8px; align-items: center; background: #1e293b; padding: 8px 16px; border-radius: 8px; border: 1px solid #334155;">
+                <span style="color: #94a3b8; font-size: 13px; font-weight: 600;">📅 Date Range:</span>
+                <input type="date" id="date-from" onchange="applyDateFilter()" value="2025-11-25"
+                       style="background: #0f172a; border: 1px solid #334155; color: #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                <span style="color: #64748b;">to</span>
+                <input type="date" id="date-to" onchange="applyDateFilter()" value="2025-12-15"
+                       style="background: #0f172a; border: 1px solid #334155; color: #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+            </div>
+            
+            <button onclick="openLessonObservationForm()" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+                <span style="font-size: 18px;">📝</span>
+                <span>Lesson Observation Form</span>
+            </button>
+            <div class="header-stats" id="header-stats"></div>
+        </div>
+    </div>
+    
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="breadcrumb" id="breadcrumb">
+                <span onclick="selectLevel('program')" class="active">🌍 Program</span>
+            </div>
+            
+            <div class="filter-section">
+                <div class="filter-title">Filters</div>
+                <select class="filter-select" id="district-filter" onchange="selectDistrict()">
+                    <option value="">All Districts</option>
+                </select>
+                <select class="filter-select" id="site-filter" onchange="selectSite()">
+                    <option value="">All Sites</option>
+                </select>
+                <select class="filter-select" id="week-filter" onchange="selectWeek()">
+                    <option value="">All Weeks</option>
+                    <option value="WEEK1">Week 1</option>
+                    <option value="WEEK2">Week 2</option>
+                    <option value="WEEK3">Week 3</option>
+                </select>
+                <button class="clear-btn" onclick="clearFilters()">Clear All Filters</button>
+            </div>
+            
+            <div class="trainer-list" id="trainer-list"></div>
+        </div>
+        
+        <div class="main-panel" id="main-panel">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p class="loading-text">Loading...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ==================== APPS SCRIPT CONFIGURATION ====================
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx4SxqNVKwprf5IgBWvNHXV9hmiFJRjK7i0QkQZZ5o1WhAWxsgVH_RFor6BdGfQn8aj/exec';
+        
+        // Global data object - will be populated from Google Sheets via Apps Script
+        let DEMO_DATA = {
+            program: {
+                name: 'E!BA Bootcamp 2025',
+                trainers: 0,
+                observations: 0,
+                average: 0,
+                date_range: '',
+                districts: 0,
+                sites: 0
+            },
+            districts: [],
+            sites: [],
+            trainers: []
+        };
+        
+        // ==================== LOAD DATA FROM GOOGLE SHEETS ====================
+        async function loadGoogleSheetData() {
+            try {
+                console.log('📊 Loading data from Google Apps Script...');
+                console.log('URL:', APPS_SCRIPT_URL);
+                
+                // Add timeout to prevent infinite loading
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                
+                const response = await fetch(APPS_SCRIPT_URL, { 
+                    signal: controller.signal,
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                clearTimeout(timeoutId);
+                
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Data received:', data);
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Validate data structure
+                if (!data.trainers || !Array.isArray(data.trainers)) {
+                    throw new Error('Invalid data structure: trainers array missing');
+                }
+                
+                if (data.trainers.length === 0) {
+                    throw new Error('No trainers found in data');
+                }
+                
+                console.log('✅ Data loaded successfully!');
+                console.log('   Trainers:', data.trainers.length);
+                console.log('   Observations:', data.program?.observations || 0);
+                console.log('   Date range:', data.program?.date_range || 'N/A');
+                
+                // Update global DEMO_DATA
+                DEMO_DATA = data;
+                
+                return true;
+            } catch (error) {
+                console.error('❌ Error loading data from Apps Script:', error);
+                
+                if (error.name === 'AbortError') {
+                    alert(`⏱️ Request Timeout!\n\nThe request took too long (>30 seconds).\n\nPossible causes:\n1. Apps Script is processing a large dataset\n2. Network connection is slow\n3. Apps Script needs optimization\n\nTry refreshing the page.`);
+                } else {
+                    alert(`❌ Cannot load data from Google Sheets!\n\nError: ${error.message}\n\nPlease check:\n1. Apps Script URL is correct\n2. Apps Script is deployed as Web App with "Anyone" access\n3. You have internet connection\n4. Open browser console (F12) for more details`);
+                }
+                return false;
+            }
+        }
+
+        let state = {
+            level: 'program', // program, district, site, trainer
+            selectedDistrict: null,
+            selectedSite: null,
+            selectedTrainer: null,
+            selectedWeek: null,
+            dateFrom: '2025-11-25',
+            dateTo: '2025-12-15',
+            activeTab: 'overview'
+        };
+
+        // Initialize
+        // ==================== INITIALIZATION ====================
+        async function init() {
+            // Show loading screen
+            showLoadingScreen();
+            
+            // Load data from Google Sheets via Apps Script
+            const success = await loadGoogleSheetData();
+            
+            if (!success) {
+                showErrorScreen();
+                return;
+            }
+            
+            // Hide loading, show dashboard
+            hideLoadingScreen();
+            
+            // Initialize dashboard
+            populateFilters();
+            updateHeaderStats();
+            renderBreadcrumb();
+            renderView();
+            
+            // Set default date values
+            const dateFrom = document.getElementById('date-from');
+            const dateTo = document.getElementById('date-to');
+            
+            if (dateFrom && dateTo) {
+                // Use dates from loaded data if available
+                const dates = DEMO_DATA.program.date_range?.split(' to ') || [];
+                if (dates.length === 2) {
+                    state.dateFrom = dates[0];
+                    state.dateTo = dates[1];
+                    dateFrom.value = dates[0];
+                    dateTo.value = dates[1];
+                }
+            }
+        }
+        
+        function showLoadingScreen() {
+            const root = document.getElementById('root');
+            if (root) {
+                root.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+                        <div style="text-align: center;">
+                            <div style="width: 64px; height: 64px; border: 4px solid #334155; border-top-color: #f97316; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
+                            <p style="color: #94a3b8; font-size: 16px; font-weight: 600;">Loading E!BA Dashboard...</p>
+                            <p style="color: #64748b; font-size: 13px; margin-top: 8px;">Fetching data from Google Sheets</p>
+                        </div>
+                    </div>
+                    <style>
+                        @keyframes spin { to { transform: rotate(360deg); } }
+                    </style>
+                `;
+            }
+        }
+        
+        function hideLoadingScreen() {
+            const root = document.getElementById('root');
+            if (root) {
+                root.innerHTML = ''; // Will be populated by renderView()
+            }
+        }
+        
+        function showErrorScreen() {
+            const root = document.getElementById('root');
+            if (root) {
+                root.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 2rem;">
+                        <div style="text-align: center; max-width: 600px;">
+                            <div style="font-size: 64px; margin-bottom: 16px;">❌</div>
+                            <h2 style="color: #ef4444; margin-bottom: 16px; font-size: 24px;">Failed to Load Data</h2>
+                            <p style="color: #94a3b8; line-height: 1.6; margin-bottom: 8px;">
+                                Could not load data from Google Sheets via Apps Script.
+                            </p>
+                            <p style="color: #64748b; font-size: 14px; line-height: 1.6; margin-bottom: 24px;">
+                                Please check:<br>
+                                • Apps Script URL is correct<br>
+                                • Apps Script is deployed as Web App<br>
+                                • You have internet connection<br><br>
+                                Check browser console (F12) for detailed error message.
+                            </p>
+                            <button onclick="location.reload()" style="padding: 12px 24px; background: #f97316; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                                🔄 Retry
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Populate Filters
+        function populateFilters() {
+            const districtSelect = document.getElementById('district-filter');
+            DEMO_DATA.districts.forEach(d => {
+                const option = document.createElement('option');
+                option.value = d.name;
+                option.textContent = d.name;
+                districtSelect.appendChild(option);
+            });
+        }
+
+        // Update Header Stats
+        function updateHeaderStats() {
+            const stats = getCurrentLevelStats();
+            document.getElementById('header-stats').innerHTML = `
+                <div class="stat-card" style="border-left-color: #10b981;">
+                    <div class="stat-value">${stats.trainers}</div>
+                    <div class="stat-label">Trainers</div>
+                </div>
+                <div class="stat-card" style="border-left-color: #3b82f6;">
+                    <div class="stat-value">${stats.observations}</div>
+                    <div class="stat-label">Observations</div>
+                </div>
+                <div class="stat-card" style="border-left-color: #f97316;">
+                    <div class="stat-value">${stats.average.toFixed(2)}</div>
+                    <div class="stat-label">Avg Score</div>
+                </div>
+            `;
+        }
+
+        // Get Current Level Stats
+        function getCurrentLevelStats() {
+            if (state.level === 'program') {
+                return DEMO_DATA.program;
+            } else if (state.level === 'district') {
+                const district = DEMO_DATA.districts.find(d => d.name === state.selectedDistrict);
+                return district || DEMO_DATA.program;
+            } else if (state.level === 'site') {
+                const site = DEMO_DATA.sites.find(s => s.name === state.selectedSite);
+                return site || DEMO_DATA.program;
+            } else if (state.level === 'trainer') {
+                const trainer = DEMO_DATA.trainers.find(t => t.trainer_id === state.selectedTrainer);
+                return {
+                    trainers: 1,
+                    observations: trainer?.stats.observation_count || 0,
+                    average: trainer?.stats.average_score || 0
+                };
+            }
+            return DEMO_DATA.program;
+        }
+
+        // Select District
+        function selectDistrict() {
+            const districtName = document.getElementById('district-filter').value;
+            if (districtName) {
+                state.level = 'district';
+                state.selectedDistrict = districtName;
+                state.selectedSite = null;
+                state.selectedTrainer = null;
+                
+                // Update site filter
+                const district = DEMO_DATA.districts.find(d => d.name === districtName);
+                const siteSelect = document.getElementById('site-filter');
+                siteSelect.innerHTML = '<option value="">All Sites</option>';
+                if (district) {
+                    district.sites.forEach(site => {
+                        const option = document.createElement('option');
+                        option.value = site;
+                        option.textContent = site;
+                        siteSelect.appendChild(option);
+                    });
+                }
+                siteSelect.disabled = false;
+            } else {
+                state.level = 'program';
+                state.selectedDistrict = null;
+                state.selectedSite = null;
+                document.getElementById('site-filter').disabled = true;
+            }
+            
+            updateHeaderStats();
+            renderBreadcrumb();
+            renderTrainerList();
+            renderView();
+        }
+
+        // Select Site
+        function selectSite() {
+            const siteName = document.getElementById('site-filter').value;
+            if (siteName) {
+                state.level = 'site';
+                state.selectedSite = siteName;
+                state.selectedTrainer = null;
+            } else {
+                state.level = 'district';
+                state.selectedSite = null;
+            }
+            
+            updateHeaderStats();
+            renderBreadcrumb();
+            renderTrainerList();
+            renderView();
+        }
+
+        // Select Week
+        function selectWeek() {
+            const weekValue = document.getElementById('week-filter').value;
+            state.selectedWeek = weekValue || null;
+            
+            updateHeaderStats();
+            renderTrainerList();
+            renderView();
+        }
+
+        // Apply Date Filter
+        function applyDateFilter() {
+            state.dateFrom = document.getElementById('date-from').value || '2025-11-25';
+            state.dateTo = document.getElementById('date-to').value || '2025-12-15';
+            
+            updateHeaderStats();
+            renderTrainerList();
+            renderView();
+        }
+
+        // Select Trainer
+        function selectTrainer(trainerId) {
+            state.level = 'trainer';
+            state.selectedTrainer = trainerId;
+            state.activeTab = 'overview';
+            
+            updateHeaderStats();
+            renderBreadcrumb();
+            renderView();
+        }
+
+        // Select Level
+        function selectLevel(level) {
+            if (level === 'program') {
+                state.level = 'program';
+                state.selectedDistrict = null;
+                state.selectedSite = null;
+                state.selectedTrainer = null;
+                document.getElementById('district-filter').value = '';
+                document.getElementById('site-filter').value = '';
+                document.getElementById('site-filter').disabled = true;
+            } else if (level === 'district' && state.selectedDistrict) {
+                state.level = 'district';
+                state.selectedSite = null;
+                state.selectedTrainer = null;
+                document.getElementById('site-filter').value = '';
+            } else if (level === 'site' && state.selectedSite) {
+                state.level = 'site';
+                state.selectedTrainer = null;
+            }
+            
+            updateHeaderStats();
+            renderBreadcrumb();
+            renderTrainerList();
+            renderView();
+        }
+
+        // Clear Filters
+        function clearFilters() {
+            state.level = 'program';
+            state.selectedDistrict = null;
+            state.selectedSite = null;
+            state.selectedTrainer = null;
+            state.selectedWeek = null;
+            state.dateFrom = '2025-11-25';
+            state.dateTo = '2025-12-15';
+            
+            document.getElementById('district-filter').value = '';
+            document.getElementById('site-filter').value = '';
+            document.getElementById('week-filter').value = '';
+            document.getElementById('date-from').value = '2025-11-25';
+            document.getElementById('date-to').value = '2025-12-15';
+            document.getElementById('site-filter').innerHTML = '<option value="">All Sites</option>';
+            document.getElementById('site-filter').disabled = true;
+            
+            updateHeaderStats();
+            renderBreadcrumb();
+            renderTrainerList();
+            renderView();
+        }
+
+        // Render Breadcrumb
+        function renderBreadcrumb() {
+            let breadcrumb = '<span onclick="selectLevel(\'program\')" class="' + (state.level === 'program' ? 'active' : '') + '">🌍 Program</span>';
+            
+            if (state.selectedDistrict) {
+                breadcrumb += ' > <span onclick="selectLevel(\'district\')" class="' + (state.level === 'district' ? 'active' : '') + '">📍 ' + state.selectedDistrict + '</span>';
+            }
+            
+            if (state.selectedSite) {
+                breadcrumb += ' > <span onclick="selectLevel(\'site\')" class="' + (state.level === 'site' ? 'active' : '') + '">🏫 ' + state.selectedSite + '</span>';
+            }
+            
+            if (state.selectedTrainer) {
+                const trainer = DEMO_DATA.trainers.find(t => t.trainer_id === state.selectedTrainer);
+                if (trainer) {
+                    breadcrumb += ' > <span class="active">👤 ' + trainer.trainer_name + '</span>';
+                }
+            }
+            
+            // Add date range indicator if filtered
+            if (state.dateFrom !== '2025-11-25' || state.dateTo !== '2025-12-15') {
+                breadcrumb += '<br><span style="color: #f97316; font-size: 11px; margin-top: 4px; display: inline-block;">📅 ' + state.dateFrom + ' to ' + state.dateTo + '</span>';
+            }
+            
+            document.getElementById('breadcrumb').innerHTML = breadcrumb;
+        }
+
+        // Render Trainer List
+        function renderTrainerList() {
+            const container = document.getElementById('trainer-list');
+            
+            if (state.level === 'trainer') {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            
+            let trainers = DEMO_DATA.trainers;
+            
+            // Filter by district
+            if (state.selectedDistrict) {
+                trainers = trainers.filter(t => t.district_name === state.selectedDistrict);
+            }
+            
+            // Filter by site
+            if (state.selectedSite) {
+                trainers = trainers.filter(t => t.training_site === state.selectedSite);
+            }
+            
+            // Filter by week - only show trainers who have observations in the selected week
+            if (state.selectedWeek) {
+                trainers = trainers.filter(t => 
+                    t.observations.some(obs => obs.week === state.selectedWeek)
+                );
+            }
+            
+            // Filter by date range - only show trainers with observations in the date range
+            if (state.dateFrom || state.dateTo) {
+                const fromDate = state.dateFrom ? new Date(state.dateFrom) : new Date('2000-01-01');
+                const toDate = state.dateTo ? new Date(state.dateTo) : new Date('2099-12-31');
+                
+                trainers = trainers.filter(t => 
+                    t.observations.some(obs => {
+                        const obsDate = new Date(obs.date);
+                        return obsDate >= fromDate && obsDate <= toDate;
+                    })
+                );
+            }
+            
+            // Sort by score
+            trainers = trainers.sort((a, b) => b.stats.average_score - a.stats.average_score);
+            
+            if (trainers.length === 0) {
+                container.innerHTML = '<div class="list-title">No trainers found</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="list-title">
+                    <span>Trainers (${trainers.length})</span>
+                    <span style="font-size: 11px;">Click to view details</span>
+                </div>
+                ${trainers.map(t => `
+                    <div class="trainer-card ${state.selectedTrainer === t.trainer_id ? 'selected' : ''} border-${getScoreColor(t.stats.average_score)}" 
+                         onclick="selectTrainer('${t.trainer_id}')">
+                        <div class="trainer-card-name">${t.trainer_name}</div>
+                        <div class="trainer-card-meta">${t.training_site}</div>
+                        <div class="trainer-card-score score-${getScoreColor(t.stats.average_score)}">${t.stats.average_score.toFixed(2)}/5.0</div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        // Render View
+        function renderView() {
+            const panel = document.getElementById('main-panel');
+            
+            if (state.level === 'program') {
+                panel.innerHTML = renderProgramView();
+            } else if (state.level === 'district') {
+                panel.innerHTML = renderDistrictView();
+            } else if (state.level === 'site') {
+                panel.innerHTML = renderSiteView();
+            } else if (state.level === 'trainer') {
+                panel.innerHTML = renderTrainerView();
+            }
+        }
+
+        // Render Program View
+        function renderProgramView() {
+            const data = DEMO_DATA.program;
+            
+            return `
+                <div class="view-header">
+                    <div>
+                        <div class="view-title">🌍 Program Overview</div>
+                        <div class="view-subtitle">${data.name} • ${data.date_range}</div>
+                    </div>
+                    <div class="score-circle border-${getScoreColor(data.average)}">
+                        <div class="score-circle-value score-${getScoreColor(data.average)}">${data.average.toFixed(2)}</div>
+                        <div class="score-circle-label">AVG SCORE</div>
+                    </div>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab ${state.activeTab === 'overview' ? 'active' : ''}" onclick="switchTab('overview')">Overview</button>
+                    <button class="tab ${state.activeTab === 'comparisons' ? 'active' : ''}" onclick="switchTab('comparisons')">Comparisons</button>
+                    <button class="tab ${state.activeTab === 'insights' ? 'active' : ''}" onclick="switchTab('insights')">AI Insights</button>
+                </div>
+                
+                <div class="tab-content">
+                    ${state.activeTab === 'overview' ? renderProgramOverview() : ''}
+                    ${state.activeTab === 'comparisons' ? renderProgramComparisons() : ''}
+                    ${state.activeTab === 'insights' ? renderProgramInsights() : ''}
+                </div>
+            `;
+        }
+
+        // Continue with remaining view renderers...
+        // (This file is getting long - shall I continue with the full implementation?)
+
+        function getScoreColor(score) {
+            if (score >= 4.5) return 'exceptional';
+            if (score >= 4.0) return 'strong';
+            if (score >= 3.5) return 'adequate';
+            if (score >= 3.0) return 'developing';
+            return 'needs-support';
+        }
+
+        function getScoreLabel(score) {
+            if (score >= 4.5) return 'Exceptional';
+            if (score >= 4.0) return 'Strong';
+            if (score >= 3.5) return 'Adequate';
+            if (score >= 3.0) return 'Developing';
+            return 'Needs Support';
+        }
+
+        function switchTab(tab) {
+            state.activeTab = tab;
+            renderView();
+        }
+
+        // Placeholder functions - will implement all views
+        function renderProgramOverview() {
+            const data = DEMO_DATA.program;
+            const districts = DEMO_DATA.districts;
+            
+            // Calculate distribution
+            const trainers = DEMO_DATA.trainers;
+            const distribution = {
+                exceptional: trainers.filter(t => t.stats.average_score >= 4.5).length,
+                strong: trainers.filter(t => t.stats.average_score >= 4.0 && t.stats.average_score < 6.5).length,
+                adequate: trainers.filter(t => t.stats.average_score >= 5.5 && t.stats.average_score < 6.0).length,
+                developing: trainers.filter(t => t.stats.average_score >= 5.0 && t.stats.average_score < 3.5).length,
+                needsSupport: trainers.filter(t => t.stats.average_score < 5.0).length
+            };
+            
+            const total = trainers.length;
+            
+            return `
+                <div class="section">
+                    <h3 class="section-title">📊 Program Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value">${data.trainers}</div>
+                            <div class="stats-grid-label">Total Trainers</div>
+                        </div>
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value">${data.observations}</div>
+                            <div class="stats-grid-label">Total Observations</div>
+                        </div>
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value">${data.districts}</div>
+                            <div class="stats-grid-label">Districts</div>
+                        </div>
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value">${data.sites}</div>
+                            <div class="stats-grid-label">Training Sites</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">📈 Performance Distribution</h3>
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; height: 40px; border-radius: 8px; overflow: hidden;">
+                            <div style="width: ${(distribution.exceptional/total)*100}%; background: #10b981; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.exceptional > 0 ? distribution.exceptional : ''}
+                            </div>
+                            <div style="width: ${(distribution.strong/total)*100}%; background: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.strong > 0 ? distribution.strong : ''}
+                            </div>
+                            <div style="width: ${(distribution.adequate/total)*100}%; background: #eab308; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.adequate > 0 ? distribution.adequate : ''}
+                            </div>
+                            <div style="width: ${(distribution.developing/total)*100}%; background: #f59e0b; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.developing > 0 ? distribution.developing : ''}
+                            </div>
+                            <div style="width: ${(distribution.needsSupport/total)*100}%; background: #ef4444; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.needsSupport > 0 ? distribution.needsSupport : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 12px; height: 12px; background: #10b981; border-radius: 3px;"></div>
+                            <span>Exceptional (6.5+): ${distribution.exceptional} (${((distribution.exceptional/total)*100).toFixed(0)}%)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 12px; height: 12px; background: #22c55e; border-radius: 3px;"></div>
+                            <span>Strong (6.0-6.49): ${distribution.strong} (${((distribution.strong/total)*100).toFixed(0)}%)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 12px; height: 12px; background: #eab308; border-radius: 3px;"></div>
+                            <span>Adequate (5.5-5.99): ${distribution.adequate} (${((distribution.adequate/total)*100).toFixed(0)}%)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 12px; height: 12px; background: #f59e0b; border-radius: 3px;"></div>
+                            <span>Developing (5.0-5.49): ${distribution.developing} (${((distribution.developing/total)*100).toFixed(0)}%)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 12px; height: 12px; background: #ef4444; border-radius: 3px;"></div>
+                            <span>Needs Support (<5.0): ${distribution.needsSupport} (${((distribution.needsSupport/total)*100).toFixed(0)}%)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">🏆 Trainer Rankings</h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #0f172a; border-bottom: 2px solid #334155;">
+                                    <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Rank</th>
+                                    <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Trainer Name</th>
+                                    <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Site</th>
+                                    <th style="padding: 12px; text-align: center; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Observations</th>
+                                    <th style="padding: 12px; text-align: center; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Trend</th>
+                                    <th style="padding: 12px; text-align: right; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${trainers.sort((a, b) => b.stats.average_score - a.stats.average_score).map((t, i) => `
+                                    <tr style="border-bottom: 1px solid #1e293b; cursor: pointer; transition: background 0.2s;" 
+                                        onclick="selectTrainer('${t.trainer_id}')"
+                                        onmouseover="this.style.background='#0f172a'" 
+                                        onmouseout="this.style.background='transparent'">
+                                        <td style="padding: 12px;">
+                                            <div style="width: 32px; height: 32px; border-radius: 50%; background: ${i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : '#334155'}; display: flex; align-items: center; justify-content: center; font-weight: bold; color: ${i < 3 ? '#0f172a' : '#e2e8f0'};">
+                                                ${i + 1}
+                                            </div>
+                                        </td>
+                                        <td style="padding: 12px;">
+                                            <div style="font-weight: 600;">${t.trainer_name}</div>
+                                            <div style="font-size: 11px; color: #64748b;">${t.district_name}</div>
+                                        </td>
+                                        <td style="padding: 12px; font-size: 13px; color: #94a3b8; max-width: 200px;">
+                                            ${t.training_site}
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            <span style="background: #334155; padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 14px;">
+                                                ${t.stats.observation_count}
+                                            </span>
+                                        </td>
+                                        <td style="padding: 12px; text-align: center;">
+                                            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: 600; ${
+                                                t.stats.trend === 'improving' ? 'background: #064e3b; color: #10b981;' : 
+                                                t.stats.trend === 'declining' ? 'background: #7f1d1d; color: #ef4444;' : 
+                                                'background: #1e293b; color: #94a3b8;'
+                                            }">
+                                                ${t.stats.trend === 'improving' ? '📈' : t.stats.trend === 'declining' ? '📉' : '➡️'}
+                                                <span style="text-transform: capitalize;">${t.stats.trend}</span>
+                                            </span>
+                                        </td>
+                                        <td style="padding: 12px; text-align: right;">
+                                            <span class="score-${getScoreColor(t.stats.average_score)}" style="font-weight: bold; font-size: 18px;">
+                                                ${t.stats.average_score.toFixed(2)}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">📍 District Rankings</h3>
+                    ${districts.sort((a, b) => b.average - a.average).map((d, i) => `
+                        <div style="display: grid; grid-template-columns: 40px 1fr 80px 100px; gap: 12px; align-items: center; padding: 12px; background: #0f172a; border-radius: 8px; margin-bottom: 8px; cursor: pointer;" onclick="document.getElementById('district-filter').value='${d.name}'; selectDistrict();">
+                            <div style="font-weight: bold; color: ${i === 0 ? '#fbbf24' : '#94a3b8'}; font-size: 18px;">
+                                #${i + 1}
+                            </div>
+                            <div>
+                                <div style="font-weight: 600;">${d.name}</div>
+                                <div style="font-size: 11px; color: #94a3b8;">${d.trainers} trainers • ${d.observations} observations</div>
+                            </div>
+                            <div class="score-${getScoreColor(d.average)}" style="font-weight: bold; font-size: 18px;">
+                                ${d.average.toFixed(2)}
+                            </div>
+                            <div style="font-size: 11px; color: ${d.average >= data.average ? '#10b981' : '#ef4444'};">
+                                ${d.average >= data.average ? '↑' : '↓'} ${Math.abs(d.average - data.average).toFixed(2)} vs program
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderProgramComparisons() {
+            const districts = DEMO_DATA.districts;
+            const trainers = DEMO_DATA.trainers;
+            const programAvg = DEMO_DATA.program.average;
+            
+            // Gender comparison
+            const maleTrainers = trainers.filter(t => t.trainer_gender === 'Male');
+            const femaleTrainers = trainers.filter(t => t.trainer_gender === 'Female');
+            const maleAvg = maleTrainers.reduce((sum, t) => sum + t.stats.average_score, 0) / maleTrainers.length;
+            const femaleAvg = femaleTrainers.reduce((sum, t) => sum + t.stats.average_score, 0) / femaleTrainers.length;
+            
+            // Trend comparison
+            const improving = trainers.filter(t => t.stats.trend === 'improving').length;
+            const stable = trainers.filter(t => t.stats.trend === 'stable').length;
+            const declining = trainers.filter(t => t.stats.trend === 'declining').length;
+            
+            return `
+                <div class="section">
+                    <h3 class="section-title">📊 District Comparisons</h3>
+                    <div class="comparison-grid">
+                        ${districts.map(d => `
+                            <div class="comparison-card">
+                                <div class="comparison-header">
+                                    <div class="comparison-icon">📍</div>
+                                    <div class="comparison-label">${d.name} District</div>
+                                </div>
+                                <div class="comparison-scores">
+                                    <div class="comparison-main-score score-${getScoreColor(d.average)}">${d.average.toFixed(2)}</div>
+                                    <div class="comparison-vs">vs</div>
+                                    <div class="comparison-compare-score">${programAvg.toFixed(2)}</div>
+                                </div>
+                                <div style="height: 8px; background: #0f172a; border-radius: 4px; overflow: hidden; margin: 12px 0;">
+                                    <div style="height: 100%; width: ${(d.average/7)*100}%; background: ${d.average >= programAvg ? '#10b981' : '#f59e0b'};"></div>
+                                </div>
+                                <div class="comparison-meta">
+                                    <span style="color: ${d.average >= programAvg ? '#10b981' : '#ef4444'};">
+                                        ${d.average >= programAvg ? '+' : ''}${(d.average - programAvg).toFixed(2)} vs program
+                                    </span>
+                                    <span>${d.trainers} trainers</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">👥 Gender Comparison</h3>
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <div class="comparison-header">
+                                <div class="comparison-icon">👨</div>
+                                <div class="comparison-label">Male Trainers</div>
+                            </div>
+                            <div class="comparison-scores">
+                                <div class="comparison-main-score score-${getScoreColor(maleAvg)}">${maleAvg.toFixed(2)}</div>
+                            </div>
+                            <div class="comparison-meta">
+                                <span>${maleTrainers.length} trainers</span>
+                                <span>${((maleTrainers.length/trainers.length)*100).toFixed(0)}% of cohort</span>
+                            </div>
+                        </div>
+                        <div class="comparison-card">
+                            <div class="comparison-header">
+                                <div class="comparison-icon">👩</div>
+                                <div class="comparison-label">Female Trainers</div>
+                            </div>
+                            <div class="comparison-scores">
+                                <div class="comparison-main-score score-${getScoreColor(femaleAvg)}">${femaleAvg.toFixed(2)}</div>
+                            </div>
+                            <div class="comparison-meta">
+                                <span>${femaleTrainers.length} trainers</span>
+                                <span>${((femaleTrainers.length/trainers.length)*100).toFixed(0)}% of cohort</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">📈 Trend Analysis</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                        <div style="background: #064e3b; padding: 20px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #10b981;">${improving}</div>
+                            <div style="font-size: 14px; color: #94a3b8; margin-top: 8px;">Improving</div>
+                            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">${((improving/trainers.length)*100).toFixed(0)}% of trainers</div>
+                        </div>
+                        <div style="background: #334155; padding: 20px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #94a3b8;">${stable}</div>
+                            <div style="font-size: 14px; color: #94a3b8; margin-top: 8px;">Stable</div>
+                            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">${((stable/trainers.length)*100).toFixed(0)}% of trainers</div>
+                        </div>
+                        <div style="background: #7f1d1d; padding: 20px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 32px; font-weight: bold; color: #ef4444;">${declining}</div>
+                            <div style="font-size: 14px; color: #94a3b8; margin-top: 8px;">Declining</div>
+                            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">${((declining/trainers.length)*100).toFixed(0)}% of trainers</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProgramInsights() {
+            const trainers = DEMO_DATA.trainers;
+            const programAvg = DEMO_DATA.program.average;
+            
+            // Identify needs attention
+            const needsAttention = trainers.filter(t => t.stats.average_score < 3.5 || t.stats.trend === 'declining');
+            const highPerformers = trainers.filter(t => t.stats.average_score >= 4.5);
+            
+            // Calculate competency averages
+            const competencies = {
+                'Pedagogical Content': 0,
+                'Facilitation & Delivery': 0,
+                'Entrepreneurship Mindset': 0,
+                'Gender Responsive': 0,
+                'Coaching & Mentoring': 0,
+                'Language': 0,
+                'Leadership': 0
+            };
+            
+            trainers.forEach(t => {
+                Object.keys(competencies).forEach(comp => {
+                    competencies[comp] += t.stats.competencies[comp];
+                });
+            });
+            
+            Object.keys(competencies).forEach(comp => {
+                competencies[comp] = competencies[comp] / trainers.length;
+            });
+            
+            // Find strongest and weakest competencies
+            const sortedComps = Object.entries(competencies).sort((a, b) => b[1] - a[1]);
+            const strongest = sortedComps.slice(0, 3);
+            const weakest = sortedComps.slice(-3);
+            
+            const urgency = needsAttention.length >= 5 ? 'immediate' : needsAttention.length >= 3 ? 'short-term' : 'monitoring';
+            const urgencyColor = urgency === 'immediate' ? '#ef4444' : urgency === 'short-term' ? '#f59e0b' : '#10b981';
+            
+            return `
+                <div class="section">
+                    <h3 class="section-title">📋 Executive Summary</h3>
+                    <div style="background: #0f172a; padding: 20px; border-radius: 8px; line-height: 1.8;">
+                        <p style="color: #cbd5e1;">
+                            The <strong>E!BA Bootcamp 2025 program</strong> comprises <strong>${trainers.length} trainers</strong> across 
+                            <strong>${DEMO_DATA.program.districts} districts</strong>, with <strong>${DEMO_DATA.program.observations} total observations</strong> 
+                            conducted from November 25 to December 15, 2025.
+                        </p>
+                        <p style="color: #cbd5e1; margin-top: 12px;">
+                            The program average is <strong class="score-${getScoreColor(programAvg)}">${programAvg.toFixed(2)}/5.0 (${getScoreLabel(programAvg)})</strong>.
+                            <strong>${highPerformers.length} trainers (${((highPerformers.length/trainers.length)*100).toFixed(0)}%)</strong> are performing at Exceptional levels,
+                            while <strong>${needsAttention.length} trainers (${((needsAttention.length/trainers.length)*100).toFixed(0)}%)</strong> need additional support.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">⚡ Intervention Urgency</h3>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <span style="padding: 8px 16px; background: ${urgencyColor}; color: white; border-radius: 20px; font-weight: bold; font-size: 14px;">
+                            ${urgency.toUpperCase()}
+                        </span>
+                        <span style="color: #94a3b8;">
+                            ${urgency === 'immediate' ? 'Multiple trainers need urgent intervention' :
+                              urgency === 'short-term' ? 'Some trainers need focused support within 2-3 weeks' :
+                              'Program performing well - continue regular monitoring'}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">💪 Program Strengths</h3>
+                    ${strongest.map(([comp, score]) => `
+                        <div class="insight-card strength">
+                            <div class="insight-title strength">${comp} (${score.toFixed(2)}/5.0)</div>
+                            <div class="insight-text">
+                                Program average for this competency is ${score >= programAvg ? 'above' : 'at'} the overall program average.
+                                ${score >= 4.0 ? 'This is a strong area across the cohort.' : 'Continued focus needed to strengthen this area.'}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">🎯 Areas for Program-Wide Development</h3>
+                    ${weakest.map(([comp, score]) => `
+                        <div class="insight-card ${score < 3.5 ? 'concern' : 'warning'}">
+                            <div class="insight-title ${score < 3.5 ? 'concern' : 'warning'}">${comp} (${score.toFixed(2)}/5.0)</div>
+                            <div class="insight-text">
+                                This competency is ${score < programAvg ? 'below' : 'at'} the program average.
+                                Consider program-wide professional development sessions focused on strengthening this area.
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                ${needsAttention.length > 0 ? `
+                    <div class="section">
+                        <h3 class="section-title">🚨 Trainers Needing Immediate Attention</h3>
+                        ${needsAttention.map(t => `
+                            <div style="display: grid; grid-template-columns: 1fr 80px 120px 150px; gap: 12px; align-items: center; padding: 12px; background: #7f1d1d20; border-radius: 8px; border-left: 4px solid #ef4444; margin-bottom: 8px; cursor: pointer;" onclick="selectTrainer('${t.trainer_id}')">
+                                <div>
+                                    <div style="font-weight: 600;">${t.trainer_name}</div>
+                                    <div style="font-size: 11px; color: #94a3b8;">${t.training_site}</div>
+                                </div>
+                                <div class="score-${getScoreColor(t.stats.average_score)}" style="font-weight: bold; font-size: 18px;">
+                                    ${t.stats.average_score.toFixed(2)}
+                                </div>
+                                <div style="font-size: 12px; color: ${t.stats.trend === 'declining' ? '#ef4444' : '#f59e0b'};">
+                                    ${t.stats.trend === 'declining' ? '📉 Declining' : '⚠️ Below threshold'}
+                                </div>
+                                <div style="font-size: 11px; color: #94a3b8;">
+                                    Click for analysis
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                <div class="section">
+                    <h3 class="section-title">📝 Action Plan</h3>
+                    <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Recommended interventions for program managers:</p>
+                    ${[
+                        {
+                            step: 1,
+                            priority: needsAttention.length >= 5 ? 'IMMEDIATE' : 'SHORT-TERM',
+                            timeline: needsAttention.length >= 5 ? 'This week' : 'Within 2 weeks',
+                            title: 'Support Struggling Trainers',
+                            actions: [
+                                `Identify root causes for underperformance in ${needsAttention.length} trainers`,
+                                'Schedule individual check-ins with each trainer',
+                                'Develop personalized improvement plans',
+                                'Assign mentors from high-performing trainers'
+                            ],
+                            metric: `Improve scores for ${needsAttention.length} trainers above 5.5`
+                        },
+                        {
+                            step: 2,
+                            priority: 'SHORT-TERM',
+                            timeline: 'Within 2 weeks',
+                            title: `Group Training: ${weakest[0][0]}`,
+                            actions: [
+                                `Organize 2-hour workshop on ${weakest[0][0]} (current avg: ${weakest[0][1].toFixed(2)})`,
+                                'Share best practices from top performers',
+                                'Provide practical exercises and resources',
+                                'Follow up with targeted coaching'
+                            ],
+                            metric: `Increase group average from ${weakest[0][1].toFixed(2)} to ${(weakest[0][1] + 0.5).toFixed(2)}`
+                        },
+                        {
+                            step: 3,
+                            priority: 'ONGOING',
+                            timeline: 'Continuous',
+                            title: 'Peer Learning & Recognition',
+                            actions: [
+                                `Pair top performers (${highPerformers.map(t => t.trainer_name).slice(0, 2).join(', ')}) with struggling trainers`,
+                                'Recognize and celebrate improvements publicly',
+                                'Create opportunities for best practice sharing',
+                                'Document successful approaches for program-wide use'
+                            ],
+                            metric: `Increase number of trainers in "Strong" or "Exceptional" categories`
+                        }
+                    ].map(plan => {
+                        const priorityColor = plan.priority === 'IMMEDIATE' ? '#ef4444' : 
+                                            plan.priority === 'SHORT-TERM' ? '#f59e0b' : '#10b981';
+                        const priorityBg = plan.priority === 'IMMEDIATE' ? '#7f1d1d33' : 
+                                         plan.priority === 'SHORT-TERM' ? '#78350f33' : '#064e3b33';
+                        return `
+                            <div style="background: ${priorityBg}; border: 1px solid ${priorityColor}40; border-radius: 12px; padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden;">
+                                <div style="position: absolute; top: 16px; right: 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: #94a3b8;">
+                                    <span>⏱️</span>
+                                    <span>${plan.timeline}</span>
+                                </div>
+                                <div style="display: flex; align-items: start; gap: 16px;">
+                                    <div style="width: 44px; height: 44px; border-radius: 50%; background: ${priorityColor}; color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; flex-shrink: 0;">
+                                        ${plan.step}
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                            <span style="padding: 4px 12px; background: ${priorityColor}; color: white; border-radius: 12px; font-size: 11px; font-weight: bold;">
+                                                ${plan.priority}
+                                            </span>
+                                            <h4 style="color: #e2e8f0; font-size: 16px; margin: 0;">${plan.title}</h4>
+                                        </div>
+                                        <div style="background: #0f172a; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                                            <div style="font-size: 11px; color: #f97316; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Action Steps:</div>
+                                            <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; font-size: 14px; line-height: 1.8;">
+                                                ${plan.actions.map(a => `<li>${a}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 8px; color: #10b981; font-size: 13px;">
+                                            <span>💚</span>
+                                            <span style="font-weight: 500;">Success Metric:</span>
+                                            <span>${plan.metric}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderDistrictView() {
+            const districtName = state.selectedDistrict;
+            const district = DEMO_DATA.districts.find(d => d.name === districtName);
+            if (!district) return '<p>District not found</p>';
+            
+            const districtTrainers = DEMO_DATA.trainers.filter(t => t.district_name === districtName);
+            const programAvg = DEMO_DATA.program.average;
+            
+            return `
+                <div class="view-header">
+                    <div>
+                        <div class="view-title">📍 ${districtName} District</div>
+                        <div class="view-subtitle">${district.trainers} trainers • ${district.observations} observations</div>
+                    </div>
+                    <div class="score-circle border-${getScoreColor(district.average)}">
+                        <div class="score-circle-value score-${getScoreColor(district.average)}">${district.average.toFixed(2)}</div>
+                        <div class="score-circle-label">AVG SCORE</div>
+                    </div>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab ${state.activeTab === 'overview' ? 'active' : ''}" onclick="switchTab('overview')">Overview</button>
+                    <button class="tab ${state.activeTab === 'comparisons' ? 'active' : ''}" onclick="switchTab('comparisons')">Comparisons</button>
+                    <button class="tab ${state.activeTab === 'insights' ? 'active' : ''}" onclick="switchTab('insights')">AI Insights</button>
+                </div>
+                
+                <div class="tab-content">
+                    ${state.activeTab === 'overview' ? renderDistrictOverview(district, districtTrainers) : ''}
+                    ${state.activeTab === 'comparisons' ? renderDistrictComparisons(district, districtTrainers, programAvg) : ''}
+                    ${state.activeTab === 'insights' ? renderDistrictInsights(district, districtTrainers, programAvg) : ''}
+                </div>
+            `;
+        }
+
+        function renderDistrictOverview(district, districtTrainers) {
+            const distribution = {
+                exceptional: districtTrainers.filter(t => t.stats.average_score >= 4.5).length,
+                strong: districtTrainers.filter(t => t.stats.average_score >= 4.0 && t.stats.average_score < 6.5).length,
+                adequate: districtTrainers.filter(t => t.stats.average_score >= 5.5 && t.stats.average_score < 6.0).length,
+                developing: districtTrainers.filter(t => t.stats.average_score >= 5.0 && t.stats.average_score < 3.5).length,
+                needsSupport: districtTrainers.filter(t => t.stats.average_score < 5.0).length
+            };
+            
+            const total = districtTrainers.length;
+            
+            return `
+                <div class="section">
+                    <h3 class="section-title">📊 District Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value">${district.trainers}</div>
+                            <div class="stats-grid-label">Trainers</div>
+                        </div>
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value">${district.observations}</div>
+                            <div class="stats-grid-label">Observations</div>
+                        </div>
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value">${district.sites.length}</div>
+                            <div class="stats-grid-label">Training Sites</div>
+                        </div>
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value score-${getScoreColor(district.average)}">${district.average.toFixed(2)}</div>
+                            <div class="stats-grid-label">Average Score</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">📈 Performance Distribution</h3>
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; height: 40px; border-radius: 8px; overflow: hidden;">
+                            <div style="width: ${(distribution.exceptional/total)*100}%; background: #10b981; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.exceptional > 0 ? distribution.exceptional : ''}
+                            </div>
+                            <div style="width: ${(distribution.strong/total)*100}%; background: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.strong > 0 ? distribution.strong : ''}
+                            </div>
+                            <div style="width: ${(distribution.adequate/total)*100}%; background: #eab308; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.adequate > 0 ? distribution.adequate : ''}
+                            </div>
+                            <div style="width: ${(distribution.developing/total)*100}%; background: #f59e0b; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.developing > 0 ? distribution.developing : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">🏆 Top Performers in ${district.name}</h3>
+                    ${districtTrainers.sort((a, b) => b.stats.average_score - a.stats.average_score).slice(0, 5).map((t, i) => `
+                        <div style="display: grid; grid-template-columns: 40px 1fr 80px; gap: 12px; align-items: center; padding: 12px; background: #0f172a; border-radius: 8px; margin-bottom: 8px; cursor: pointer;" onclick="selectTrainer('${t.trainer_id}')">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: ${i === 0 ? '#fbbf24' : '#334155'}; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                ${i + 1}
+                            </div>
+                            <div>
+                                <div style="font-weight: 600;">${t.trainer_name}</div>
+                                <div style="font-size: 11px; color: #94a3b8;">${t.training_site}</div>
+                            </div>
+                            <div class="score-${getScoreColor(t.stats.average_score)}" style="font-weight: bold; font-size: 18px;">
+                                ${t.stats.average_score.toFixed(2)}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">🏫 Sites in ${district.name}</h3>
+                    ${district.sites.map(site => {
+                        const siteTrainers = districtTrainers.filter(t => t.training_site === site);
+                        const siteAvg = siteTrainers.reduce((sum, t) => sum + t.stats.average_score, 0) / siteTrainers.length;
+                        return `
+                            <div style="display: grid; grid-template-columns: 1fr 80px 100px; gap: 12px; align-items: center; padding: 12px; background: #0f172a; border-radius: 8px; margin-bottom: 8px; cursor: pointer;" onclick="document.getElementById('site-filter').value='${site}'; selectSite();">
+                                <div>
+                                    <div style="font-weight: 600;">${site}</div>
+                                    <div style="font-size: 11px; color: #94a3b8;">${siteTrainers.length} trainers</div>
+                                </div>
+                                <div class="score-${getScoreColor(siteAvg)}" style="font-weight: bold; font-size: 18px;">
+                                    ${siteAvg.toFixed(2)}
+                                </div>
+                                <div style="font-size: 11px; color: ${siteAvg >= district.average ? '#10b981' : '#ef4444'};">
+                                    ${siteAvg >= district.average ? '↑' : '↓'} vs district
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderDistrictComparisons(district, districtTrainers, programAvg) {
+            return `
+                <div class="section">
+                    <h3 class="section-title">📊 ${district.name} vs Program</h3>
+                    <div class="comparison-card" style="max-width: 500px;">
+                        <div class="comparison-header">
+                            <div class="comparison-icon">📍</div>
+                            <div class="comparison-label">${district.name} vs Program Average</div>
+                        </div>
+                        <div class="comparison-scores">
+                            <div class="comparison-main-score score-${getScoreColor(district.average)}">${district.average.toFixed(2)}</div>
+                            <div class="comparison-vs">vs</div>
+                            <div class="comparison-compare-score">${programAvg.toFixed(2)}</div>
+                        </div>
+                        <div style="height: 8px; background: #0f172a; border-radius: 4px; overflow: hidden; margin: 12px 0;">
+                            <div style="height: 100%; width: ${(district.average/7)*100}%; background: ${district.average >= programAvg ? '#10b981' : '#f59e0b'};"></div>
+                        </div>
+                        <div class="comparison-meta">
+                            <span style="color: ${district.average >= programAvg ? '#10b981' : '#ef4444'};">
+                                ${district.average >= programAvg ? '+' : ''}${(district.average - programAvg).toFixed(2)} vs program average
+                            </span>
+                            <span>${district.trainers} trainers</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">🏫 Site Rankings within ${district.name}</h3>
+                    ${district.sites.map((site, i) => {
+                        const siteTrainers = districtTrainers.filter(t => t.training_site === site);
+                        const siteAvg = siteTrainers.reduce((sum, t) => sum + t.stats.average_score, 0) / siteTrainers.length;
+                        return { site, avg: siteAvg, trainers: siteTrainers.length };
+                    }).sort((a, b) => b.avg - a.avg).map((s, i) => `
+                        <div style="display: grid; grid-template-columns: 40px 1fr 80px 120px; gap: 12px; align-items: center; padding: 12px; background: #0f172a; border-radius: 8px; margin-bottom: 8px;">
+                            <div style="font-weight: bold; color: ${i === 0 ? '#fbbf24' : '#94a3b8'}; font-size: 18px;">
+                                #${i + 1}
+                            </div>
+                            <div>
+                                <div style="font-weight: 600;">${s.site}</div>
+                                <div style="font-size: 11px; color: #94a3b8;">${s.trainers} trainers</div>
+                            </div>
+                            <div class="score-${getScoreColor(s.avg)}" style="font-weight: bold; font-size: 18px;">
+                                ${s.avg.toFixed(2)}
+                            </div>
+                            <div style="font-size: 11px; color: ${s.avg >= district.average ? '#10b981' : '#ef4444'};">
+                                ${s.avg >= district.average ? '↑' : '↓'} ${Math.abs(s.avg - district.average).toFixed(2)} vs district
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderDistrictInsights(district, districtTrainers, programAvg) {
+            const needsAttention = districtTrainers.filter(t => t.stats.average_score < 3.5);
+            const highPerformers = districtTrainers.filter(t => t.stats.average_score >= 4.5);
+            
+            return `
+                <div class="section">
+                    <h3 class="section-title">📋 District Summary</h3>
+                    <div style="background: #0f172a; padding: 20px; border-radius: 8px; line-height: 1.8;">
+                        <p style="color: #cbd5e1;">
+                            <strong>${district.name} District</strong> has <strong>${district.trainers} trainers</strong> with 
+                            <strong>${district.observations} observations</strong> recorded. The district average is 
+                            <strong class="score-${getScoreColor(district.average)}">${district.average.toFixed(2)}/5.0</strong>, which is 
+                            <strong style="color: ${district.average >= programAvg ? '#10b981' : '#ef4444'};">
+                                ${district.average >= programAvg ? `${(district.average - programAvg).toFixed(2)} points above` : `${(programAvg - district.average).toFixed(2)} points below`}
+                            </strong> the program average of ${programAvg.toFixed(2)}.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">💪 District Strengths</h3>
+                    ${highPerformers.length > 0 ? `
+                        <div class="insight-card strength">
+                            <div class="insight-title strength">Strong Trainer Cohort</div>
+                            <div class="insight-text">
+                                ${highPerformers.length} trainer${highPerformers.length !== 1 ? 's' : ''} (${((highPerformers.length/district.trainers)*100).toFixed(0)}%) 
+                                performing at Exceptional levels (6.5+). These trainers can serve as mentors and models for others in the district.
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${district.average >= programAvg ? `
+                        <div class="insight-card strength">
+                            <div class="insight-title strength">Above Program Average</div>
+                            <div class="insight-text">
+                                District performance is ${(district.average - programAvg).toFixed(2)} points above program average. 
+                                Continue current practices and document successful approaches for program-wide sharing.
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                ${needsAttention.length > 0 ? `
+                    <div class="section">
+                        <h3 class="section-title">🎯 Priority Areas</h3>
+                        <div class="insight-card warning">
+                            <div class="insight-title warning">Trainers Needing Support</div>
+                            <div class="insight-text">
+                                ${needsAttention.length} trainer${needsAttention.length !== 1 ? 's' : ''} in ${district.name} 
+                                ${needsAttention.length !== 1 ? 'are' : 'is'} scoring below 5.5. Recommend intensive mentorship and targeted coaching.
+                            </div>
+                        </div>
+                        ${needsAttention.map(t => `
+                            <div style="padding: 12px; background: #7f1d1d20; border-radius: 8px; border-left: 4px solid #ef4444; margin-bottom: 8px; cursor: pointer;" onclick="selectTrainer('${t.trainer_id}')">
+                                <div style="font-weight: 600;">${t.trainer_name}</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">${t.training_site} • Score: ${t.stats.average_score.toFixed(2)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                <div class="section">
+                    <h3 class="section-title">📝 Recommended District Actions</h3>
+                    ${[
+                        {
+                            step: 1,
+                            priority: 'IMMEDIATE',
+                            focus: 'District Peer Learning',
+                            actions: [
+                                `Establish monthly district-wide peer learning sessions`,
+                                `Pair high performers with developing trainers within district`,
+                                `Create district WhatsApp group for real-time support`,
+                                `Schedule joint observations across sites`
+                            ]
+                        },
+                        {
+                            step: 2,
+                            priority: needsAttention.length >= 2 ? 'URGENT' : 'SHORT-TERM',
+                            focus: 'Targeted Support',
+                            actions: [
+                                `Increase observation frequency for ${needsAttention.length} trainers needing support`,
+                                `Provide weekly coaching sessions for lowest-performing trainers`,
+                                `Develop action plans with clear improvement targets`,
+                                `Assign mentors from high-performing trainers in district`
+                            ]
+                        }
+                    ].map(plan => {
+                        const priorityColor = plan.priority === 'URGENT' || plan.priority === 'IMMEDIATE' ? '#ef4444' : '#f59e0b';
+                        return `
+                            <div class="action-step">
+                                <div class="step-number" style="background: ${priorityColor};">${plan.step}</div>
+                                <div class="step-content">
+                                    <div class="step-header">
+                                        <div class="step-priority" style="color: ${priorityColor};">${plan.priority}</div>
+                                    </div>
+                                    <div class="step-focus">${plan.focus}</div>
+                                    <div class="step-actions">
+                                        <div class="step-actions-title">ACTION STEPS:</div>
+                                        <ul class="step-actions-list">
+                                            ${plan.actions.map(a => `<li>${a}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderSiteView() {
+            const siteName = state.selectedSite;
+            const site = DEMO_DATA.sites.find(s => s.name === siteName);
+            if (!site) {
+                // Fallback - calculate from trainers
+                const siteTrainers = DEMO_DATA.trainers.filter(t => t.training_site === siteName);
+                if (siteTrainers.length === 0) return '<p>Site not found</p>';
+                
+                const siteAvg = siteTrainers.reduce((sum, t) => sum + t.stats.average_score, 0) / siteTrainers.length;
+                const siteObs = siteTrainers.reduce((sum, t) => sum + t.stats.observation_count, 0);
+                
+                const tempSite = {
+                    name: siteName,
+                    district: siteTrainers[0].district_name,
+                    trainers: siteTrainers.length,
+                    observations: siteObs,
+                    average: siteAvg
+                };
+                
+                return renderSiteContent(tempSite, siteTrainers);
+            }
+            
+            const siteTrainers = DEMO_DATA.trainers.filter(t => t.training_site === siteName);
+            return renderSiteContent(site, siteTrainers);
+        }
+
+        function renderSiteContent(site, siteTrainers) {
+            return `
+                <div class="view-header">
+                    <div>
+                        <div class="view-title">🏫 ${site.name}</div>
+                        <div class="view-subtitle">${site.district} • ${site.trainers} trainers • ${site.observations} observations</div>
+                    </div>
+                    <div class="score-circle border-${getScoreColor(site.average)}">
+                        <div class="score-circle-value score-${getScoreColor(site.average)}">${site.average.toFixed(2)}</div>
+                        <div class="score-circle-label">AVG SCORE</div>
+                    </div>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab ${state.activeTab === 'overview' ? 'active' : ''}" onclick="switchTab('overview')">Overview</button>
+                    <button class="tab ${state.activeTab === 'comparisons' ? 'active' : ''}" onclick="switchTab('comparisons')">Comparisons</button>
+                    <button class="tab ${state.activeTab === 'insights' ? 'active' : ''}" onclick="switchTab('insights')">AI Insights</button>
+                </div>
+                
+                <div class="tab-content">
+                    ${state.activeTab === 'overview' ? renderSiteOverview(site, siteTrainers) : ''}
+                    ${state.activeTab === 'comparisons' ? renderSiteComparisons(site, siteTrainers) : ''}
+                    ${state.activeTab === 'insights' ? renderSiteInsights(site, siteTrainers) : ''}
+                </div>
+            `;
+        }
+
+        function renderSiteOverview(site, siteTrainers) {
+            const distribution = {
+                exceptional: siteTrainers.filter(t => t.stats.average_score >= 4.5).length,
+                strong: siteTrainers.filter(t => t.stats.average_score >= 4.0 && t.stats.average_score < 6.5).length,
+                adequate: siteTrainers.filter(t => t.stats.average_score >= 5.5 && t.stats.average_score < 6.0).length,
+                developing: siteTrainers.filter(t => t.stats.average_score >= 5.0 && t.stats.average_score < 3.5).length,
+                needsSupport: siteTrainers.filter(t => t.stats.average_score < 5.0).length
+            };
+            
+            return `
+                <div class="section">
+                    <h3 class="section-title">📊 Site Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value">${site.trainers}</div>
+                            <div class="stats-grid-label">Trainers at Site</div>
+                        </div>
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value">${site.observations}</div>
+                            <div class="stats-grid-label">Total Observations</div>
+                        </div>
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value score-${getScoreColor(site.average)}">${site.average.toFixed(2)}</div>
+                            <div class="stats-grid-label">Average Score</div>
+                        </div>
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value">${(site.observations / site.trainers).toFixed(1)}</div>
+                            <div class="stats-grid-label">Obs per Trainer</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">📈 Trainer Distribution at Site</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
+                        ${[
+                            { label: 'Exceptional', count: distribution.exceptional, color: '#10b981' },
+                            { label: 'Strong', count: distribution.strong, color: '#22c55e' },
+                            { label: 'Adequate', count: distribution.adequate, color: '#eab308' },
+                            { label: 'Developing', count: distribution.developing, color: '#f59e0b' },
+                            { label: 'Needs Support', count: distribution.needsSupport, color: '#ef4444' }
+                        ].map(d => `
+                            <div style="background: #0f172a; padding: 16px; border-radius: 8px; text-align: center; border-left: 4px solid ${d.color};">
+                                <div style="font-size: 28px; font-weight: bold; color: ${d.color};">${d.count}</div>
+                                <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">${d.label}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">👥 Trainers at ${site.name}</h3>
+                    ${siteTrainers.sort((a, b) => b.stats.average_score - a.stats.average_score).map((t, i) => `
+                        <div style="display: grid; grid-template-columns: 40px 1fr 80px 150px; gap: 12px; align-items: center; padding: 12px; background: #0f172a; border-radius: 8px; border-left: 4px solid ${i === 0 ? '#fbbf24' : '#334155'}; margin-bottom: 8px; cursor: pointer;" onclick="selectTrainer('${t.trainer_id}')">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: ${i === 0 ? '#fbbf24' : '#334155'}; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white;">
+                                ${i + 1}
+                            </div>
+                            <div>
+                                <div style="font-weight: 600;">${t.trainer_name}</div>
+                                <div style="font-size: 11px; color: #94a3b8;">${t.stats.observation_count} observations</div>
+                            </div>
+                            <div class="score-${getScoreColor(t.stats.average_score)}" style="font-weight: bold; font-size: 18px;">
+                                ${t.stats.average_score.toFixed(2)}
+                            </div>
+                            <div style="font-size: 11px;">
+                                <span style="color: ${t.stats.trend === 'improving' ? '#10b981' : t.stats.trend === 'declining' ? '#ef4444' : '#94a3b8'};">
+                                    ${t.stats.trend === 'improving' ? '📈 Improving' : t.stats.trend === 'declining' ? '📉 Declining' : '➡️ Stable'}
+                                </span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">📊 Performance Trends</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                        ${[
+                            { label: 'Improving', count: siteTrainers.filter(t => t.stats.trend === 'improving').length, color: '#10b981', icon: '📈' },
+                            { label: 'Stable', count: siteTrainers.filter(t => t.stats.trend === 'stable').length, color: '#94a3b8', icon: '➡️' },
+                            { label: 'Declining', count: siteTrainers.filter(t => t.stats.trend === 'declining').length, color: '#ef4444', icon: '📉' }
+                        ].map(trend => `
+                            <div style="background: #0f172a; padding: 20px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 32px; margin-bottom: 8px;">${trend.icon}</div>
+                                <div style="font-size: 28px; font-weight: bold; color: ${trend.color};">${trend.count}</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">${trend.label}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSiteComparisons(site, siteTrainers) {
+            const district = DEMO_DATA.districts.find(d => d.name === site.district);
+            const programAvg = DEMO_DATA.program.average;
+            const districtAvg = district ? district.average : programAvg;
+            
+            return `
+                <div class="section">
+                    <h3 class="section-title">📊 Site Performance Comparisons</h3>
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <div class="comparison-header">
+                                <div class="comparison-icon">🏫</div>
+                                <div class="comparison-label">Site vs District</div>
+                            </div>
+                            <div class="comparison-scores">
+                                <div class="comparison-main-score score-${getScoreColor(site.average)}">${site.average.toFixed(2)}</div>
+                                <div class="comparison-vs">vs</div>
+                                <div class="comparison-compare-score">${districtAvg.toFixed(2)}</div>
+                            </div>
+                            <div class="comparison-meta">
+                                <span style="color: ${site.average >= districtAvg ? '#10b981' : '#ef4444'};">
+                                    ${site.average >= districtAvg ? '+' : ''}${(site.average - districtAvg).toFixed(2)} vs district
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-card">
+                            <div class="comparison-header">
+                                <div class="comparison-icon">🌍</div>
+                                <div class="comparison-label">Site vs Program</div>
+                            </div>
+                            <div class="comparison-scores">
+                                <div class="comparison-main-score score-${getScoreColor(site.average)}">${site.average.toFixed(2)}</div>
+                                <div class="comparison-vs">vs</div>
+                                <div class="comparison-compare-score">${programAvg.toFixed(2)}</div>
+                            </div>
+                            <div class="comparison-meta">
+                                <span style="color: ${site.average >= programAvg ? '#10b981' : '#ef4444'};">
+                                    ${site.average >= programAvg ? '+' : ''}${(site.average - programAvg).toFixed(2)} vs program
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">👥 Trainer Rankings at Site</h3>
+                    ${siteTrainers.sort((a, b) => b.stats.average_score - a.stats.average_score).map((t, i) => `
+                        <div style="display: grid; grid-template-columns: 50px 1fr 80px 120px; gap: 12px; align-items: center; padding: 12px; background: ${i === 0 ? '#064e3b20' : '#0f172a'}; border-radius: 8px; border-left: 4px solid ${i === 0 ? '#10b981' : '#334155'}; margin-bottom: 8px; cursor: pointer;" onclick="selectTrainer('${t.trainer_id}')">
+                            <div style="text-align: center;">
+                                <div style="font-size: 20px; font-weight: bold; color: ${i === 0 ? '#fbbf24' : '#94a3b8'};">
+                                    #${i + 1}
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600;">${t.trainer_name}</div>
+                                <div style="font-size: 11px; color: #94a3b8;">${t.stats.observation_count} observations</div>
+                            </div>
+                            <div class="score-${getScoreColor(t.stats.average_score)}" style="font-weight: bold; font-size: 20px;">
+                                ${t.stats.average_score.toFixed(2)}
+                            </div>
+                            <div style="font-size: 11px; color: ${t.stats.average_score >= site.average ? '#10b981' : '#ef4444'};">
+                                ${t.stats.average_score >= site.average ? '↑' : '↓'} ${Math.abs(t.stats.average_score - site.average).toFixed(2)} vs site avg
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">📈 Competency Comparison</h3>
+                    <p style="font-size: 13px; color: #94a3b8; margin-bottom: 16px;">Average scores across all trainers at this site</p>
+                    ${(() => {
+                        const competencies = {
+                            'Pedagogical Content': 0,
+                            'Facilitation & Delivery': 0,
+                            'Entrepreneurship Mindset': 0,
+                            'Gender Responsive': 0,
+                            'Coaching & Mentoring': 0,
+                            'Language': 0,
+                            'Leadership': 0
+                        };
+                        
+                        siteTrainers.forEach(t => {
+                            Object.keys(competencies).forEach(comp => {
+                                competencies[comp] += t.stats.competencies[comp];
+                            });
+                        });
+                        
+                        Object.keys(competencies).forEach(comp => {
+                            competencies[comp] = competencies[comp] / siteTrainers.length;
+                        });
+                        
+                        return Object.entries(competencies).map(([comp, score]) => `
+                            <div class="competency-item">
+                                <div class="competency-label">${comp}</div>
+                                <div class="competency-bar">
+                                    <div class="competency-fill fill-${getScoreColor(score)}" style="width: ${(score/5)*100}%"></div>
+                                </div>
+                                <div class="competency-score score-${getScoreColor(score)}">${score.toFixed(2)}</div>
+                            </div>
+                        `).join('');
+                    })()}
+                </div>
+            `;
+        }
+
+        function renderSiteInsights(site, siteTrainers) {
+            const needsAttention = siteTrainers.filter(t => t.stats.average_score < 3.5);
+            const highPerformers = siteTrainers.filter(t => t.stats.average_score >= 4.5);
+            const district = DEMO_DATA.districts.find(d => d.name === site.district);
+            const districtAvg = district ? district.average : DEMO_DATA.program.average;
+            
+            return `
+                <div class="section">
+                    <h3 class="section-title">📋 Site Summary</h3>
+                    <div style="background: #0f172a; padding: 20px; border-radius: 8px; line-height: 1.8;">
+                        <p style="color: #cbd5e1;">
+                            <strong>${site.name}</strong> in <strong>${site.district} District</strong> has <strong>${site.trainers} trainers</strong> 
+                            with <strong>${site.observations} total observations</strong>. The site average is 
+                            <strong class="score-${getScoreColor(site.average)}">${site.average.toFixed(2)}/5.0</strong>, which is 
+                            <strong style="color: ${site.average >= districtAvg ? '#10b981' : '#ef4444'};">
+                                ${site.average >= districtAvg ? (site.average - districtAvg).toFixed(2) + ' points above' : (districtAvg - site.average).toFixed(2) + ' points below'}
+                            </strong> the district average.
+                        </p>
+                    </div>
+                </div>
+                
+                ${highPerformers.length > 0 ? `
+                    <div class="section">
+                        <h3 class="section-title">💪 Site Strengths</h3>
+                        <div class="insight-card strength">
+                            <div class="insight-title strength">High-Performing Trainers</div>
+                            <div class="insight-text">
+                                ${highPerformers.length} trainer${highPerformers.length !== 1 ? 's' : ''} at this site 
+                                ${highPerformers.length !== 1 ? 'are' : 'is'} performing at Exceptional levels (6.5+):
+                                <strong>${highPerformers.map(t => t.trainer_name).join(', ')}</strong>.
+                                ${highPerformers.length > 1 ? 'These trainers can support others at the site.' : 'This trainer can serve as a model for others.'}
+                            </div>
+                        </div>
+                        ${site.average >= districtAvg ? `
+                            <div class="insight-card strength">
+                                <div class="insight-title strength">Above District Average</div>
+                                <div class="insight-text">
+                                    This site is performing ${(site.average - districtAvg).toFixed(2)} points above the ${site.district} district average. 
+                                    The collaborative environment and site-level practices are contributing to strong outcomes.
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : ''}
+                
+                ${needsAttention.length > 0 ? `
+                    <div class="section">
+                        <h3 class="section-title">🎯 Focus Areas</h3>
+                        <div class="insight-card warning">
+                            <div class="insight-title warning">Trainers Needing Site-Level Support</div>
+                            <div class="insight-text">
+                                ${needsAttention.length} trainer${needsAttention.length !== 1 ? 's' : ''} at ${site.name} would benefit from 
+                                additional coaching and peer support. Consider establishing site-based mentorship pairs.
+                            </div>
+                        </div>
+                        ${needsAttention.map(t => `
+                            <div style="padding: 12px; background: #7f1d1d20; border-radius: 8px; border-left: 4px solid #f59e0b; margin-bottom: 8px; cursor: pointer;" onclick="selectTrainer('${t.trainer_id}')">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <div style="font-weight: 600;">${t.trainer_name}</div>
+                                        <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">
+                                            ${t.stats.observation_count} observations • ${t.stats.trend}
+                                        </div>
+                                    </div>
+                                    <div class="score-${getScoreColor(t.stats.average_score)}" style="font-weight: bold; font-size: 18px;">
+                                        ${t.stats.average_score.toFixed(2)}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                <div class="section">
+                    <h3 class="section-title">📝 Site-Level Action Plan</h3>
+                    ${[
+                        {
+                            step: 1,
+                            priority: highPerformers.length > 0 ? 'LEVERAGE' : 'BUILD',
+                            focus: 'Peer Collaboration',
+                            actions: [
+                                `Establish weekly site-level planning sessions for all ${site.trainers} trainers`,
+                                highPerformers.length > 0 ? `Have ${highPerformers[0].trainer_name} share best practices with site team` : 'Bring in external master trainer for demonstration session',
+                                `Create shared resource library specific to site context`,
+                                `Schedule peer observations between trainers at site`
+                            ]
+                        },
+                        {
+                            step: 2,
+                            priority: needsAttention.length > 0 ? 'IMMEDIATE' : 'ONGOING',
+                            focus: 'Site-Based Support',
+                            actions: needsAttention.length > 0 ? [
+                                `Pair ${needsAttention.map(t => t.trainer_name).join(' and ')} with high performer${highPerformers.length > 0 ? ' at site' : ' from district'}`,
+                                `Increase observation frequency at ${site.name} for next 3 weeks`,
+                                `Conduct site visit with district coordinator to assess needs`,
+                                `Provide immediate feedback after each session`
+                            ] : [
+                                `Maintain current observation schedule`,
+                                `Continue site-level collaboration meetings`,
+                                `Document and share successful practices`,
+                                `Monitor for any emerging challenges`
+                            ]
+                        }
+                    ].map(plan => {
+                        const priorityColor = plan.priority === 'IMMEDIATE' ? '#ef4444' : 
+                                            plan.priority === 'LEVERAGE' ? '#10b981' :
+                                            plan.priority === 'BUILD' ? '#3b82f6' : '#94a3b8';
+                        return `
+                            <div class="action-step">
+                                <div class="step-number" style="background: ${priorityColor};">${plan.step}</div>
+                                <div class="step-content">
+                                    <div class="step-header">
+                                        <div class="step-priority" style="color: ${priorityColor};">${plan.priority}</div>
+                                    </div>
+                                    <div class="step-focus">${plan.focus}</div>
+                                    <div class="step-actions">
+                                        <div class="step-actions-title">ACTION STEPS:</div>
+                                        <ul class="step-actions-list">
+                                            ${plan.actions.map(a => `<li>${a}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderTrainerView() {
+            const trainerId = state.selectedTrainer;
+            const trainer = DEMO_DATA.trainers.find(t => t.trainer_id === trainerId);
+            if (!trainer) return '<p>Trainer not found</p>';
+            
+            // Generate dynamic analysis from trainer data
+            const analysis = generateTrainerAnalysis(trainer);
+            
+            return `
+                <div class="view-header">
+                    <div>
+                        <div class="view-title">👤 ${trainer.trainer_name}</div>
+                        <div class="view-subtitle">${trainer.training_site} • ${trainer.district_name}</div>
+                    </div>
+                    <div class="score-circle border-${getScoreColor(trainer.stats.average_score)}">
+                        <div class="score-circle-value score-${getScoreColor(trainer.stats.average_score)}">${trainer.stats.average_score.toFixed(2)}</div>
+                        <div class="score-circle-label">AVG SCORE</div>
+                    </div>
+                </div>
+                
+                <div class="tabs">
+                    <button class="tab ${state.activeTab === 'overview' ? 'active' : ''}" onclick="switchTab('overview')">Overview</button>
+                    <button class="tab ${state.activeTab === 'comparisons' ? 'active' : ''}" onclick="switchTab('comparisons')">Comparisons</button>
+                    <button class="tab ${state.activeTab === 'insights' ? 'active' : ''}" onclick="switchTab('insights')">AI Insights</button>
+                </div>
+                
+                <div class="tab-content">
+                    ${state.activeTab === 'overview' ? renderTrainerOverview(trainer) : ''}
+                    ${state.activeTab === 'comparisons' ? renderTrainerComparisons(trainer) : ''}
+                    ${state.activeTab === 'insights' ? renderTrainerInsights(trainer, analysis) : ''}
+                </div>
+            `;
+        }
+        
+        // Generate AI analysis dynamically from trainer data
+        function generateTrainerAnalysis(trainer) {
+            const avgScore = trainer.stats.average_score;
+            const trend = trainer.stats.trend;
+            const obsCount = trainer.stats.observation_count;
+            const comps = trainer.stats.competencies;
+            
+            // Determine urgency
+            let urgency = 'monitoring';
+            if (avgScore < 3.0 || (avgScore < 3.5 && trend === 'declining')) {
+                urgency = 'immediate';
+            } else if (avgScore < 3.5 || trend === 'declining') {
+                urgency = 'short-term';
+            }
+            
+            // Identify strengths (competencies >= 4.0)
+            const strengths = [];
+            Object.entries(comps).forEach(([name, score]) => {
+                if (score >= 4.0) {
+                    strengths.push(`Strong ${name} skills (${score.toFixed(1)}/5.0)`);
+                }
+            });
+            
+            if (trend === 'improving') {
+                strengths.push(`Positive performance trend (${trend})`);
+            }
+            
+            if (obsCount >= 8) {
+                strengths.push(`Consistent participation (${obsCount} observations)`);
+            }
+            
+            if (strengths.length === 0) {
+                strengths.push('Showing commitment through regular attendance');
+            }
+            
+            // Identify concerns (competencies < 3.5)
+            const concerns = [];
+            Object.entries(comps).forEach(([name, score]) => {
+                if (score < 3.0) {
+                    concerns.push(`${name} needs significant improvement (${score.toFixed(1)}/5.0) - HIGH PRIORITY`);
+                } else if (score < 3.5) {
+                    concerns.push(`${name} requires development (${score.toFixed(1)}/5.0) - MEDIUM PRIORITY`);
+                }
+            });
+            
+            if (trend === 'declining') {
+                concerns.push('Performance declining over time - REQUIRES ATTENTION');
+            }
+            
+            if (avgScore < 3.5) {
+                concerns.push(`Overall performance below target (${avgScore.toFixed(2)}/5.0)`);
+            }
+            
+            // Generate action plan
+            const actionPlan = [];
+            
+            if (avgScore < 3.0) {
+                actionPlan.push('IMMEDIATE: Schedule intensive one-on-one coaching session this week');
+                actionPlan.push('Pair with high-performing mentor trainer for job shadowing');
+                actionPlan.push('Conduct daily lesson plan reviews before sessions');
+            } else if (avgScore < 3.5) {
+                actionPlan.push('Schedule weekly coaching sessions for next 4 weeks');
+                actionPlan.push('Focus on lowest-scoring competencies through targeted practice');
+                actionPlan.push('Observe high-performing trainers in action');
+            } else if (avgScore >= 4.5) {
+                actionPlan.push('Leverage as peer mentor for developing trainers');
+                actionPlan.push('Consider for leadership development opportunities');
+                actionPlan.push('Share best practices in trainer meetings');
+            } else {
+                actionPlan.push('Continue regular observation and feedback cycle');
+                actionPlan.push('Strengthen specific competency areas identified above');
+                actionPlan.push('Encourage peer learning and collaboration');
+            }
+            
+            // Add competency-specific actions
+            const lowestComp = Object.entries(comps).sort((a, b) => a[1] - b[1])[0];
+            if (lowestComp && lowestComp[1] < 4.0) {
+                actionPlan.push(`Targeted development: ${lowestComp[0]} through focused workshops`);
+            }
+            
+            return {
+                urgency,
+                strengths,
+                concerns: concerns.length > 0 ? concerns : ['Maintain current performance standards'],
+                actionPlan
+            };
+        }
+
+        function renderTrainerOverview(trainer) {
+            return `
+                <div class="section">
+                    <h3 class="section-title">📊 Trainer Statistics</h3>
+                    <div class="stats-grid">
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value">${trainer.stats.observation_count}</div>
+                            <div class="stats-grid-label">Total Observations</div>
+                        </div>
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value score-${getScoreColor(trainer.stats.average_score)}">${trainer.stats.average_score.toFixed(2)}</div>
+                            <div class="stats-grid-label">Average Score</div>
+                        </div>
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value">${getScoreLabel(trainer.stats.average_score)}</div>
+                            <div class="stats-grid-label">Performance Level</div>
+                        </div>
+                        <div class="stats-grid-item">
+                            <div class="stats-grid-value" style="color: ${trainer.stats.trend === 'improving' ? '#10b981' : trainer.stats.trend === 'declining' ? '#ef4444' : '#94a3b8'};">
+                                ${trainer.stats.trend === 'improving' ? '📈' : trainer.stats.trend === 'declining' ? '📉' : '➡️'}
+                            </div>
+                            <div class="stats-grid-label">${trainer.stats.trend.charAt(0).toUpperCase() + trainer.stats.trend.slice(1)}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">📈 Observation History</h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #0f172a; border-bottom: 2px solid #334155;">
+                                    <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">#</th>
+                                    <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Date</th>
+                                    <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Week</th>
+                                    <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Observer Name</th>
+                                    <th style="padding: 12px; text-align: right; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${trainer.observations.map((obs, i) => `
+                                    <tr style="border-bottom: 1px solid #1e293b; transition: background 0.2s;" onmouseover="this.style.background='#0f172a'" onmouseout="this.style.background='transparent'">
+                                        <td style="padding: 12px; color: #64748b; font-weight: 600;">${i + 1}</td>
+                                        <td style="padding: 12px; color: #cbd5e1;">${obs.date}</td>
+                                        <td style="padding: 12px;">
+                                            <span style="background: #334155; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                                                ${obs.week}
+                                            </span>
+                                        </td>
+                                        <td style="padding: 12px; color: #cbd5e1;">${obs.observer || 'Not specified'}</td>
+                                        <td style="padding: 12px; text-align: right;">
+                                            <span class="score-${getScoreColor(obs.score)}" style="font-weight: bold; font-size: 16px;">
+                                                ${obs.score.toFixed(2)} / 5.0
+                                            </span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">💡 Competency Breakdown</h3>
+                    ${Object.entries(trainer.stats.competencies).map(([comp, score]) => `
+                        <div class="competency-item">
+                            <div class="competency-label">${comp}</div>
+                            <div class="competency-bar">
+                                <div class="competency-fill fill-${getScoreColor(score)}" style="width: ${(score/5)*100}%"></div>
+                            </div>
+                            <div class="competency-score score-${getScoreColor(score)}">${score.toFixed(2)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">📍 Context</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <div style="background: #0f172a; padding: 16px; border-radius: 8px;">
+                            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">DISTRICT</div>
+                            <div style="font-weight: 600;">${trainer.district_name}</div>
+                        </div>
+                        <div style="background: #0f172a; padding: 16px; border-radius: 8px;">
+                            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">TRAINING SITE</div>
+                            <div style="font-weight: 600; font-size: 13px;">${trainer.training_site}</div>
+                        </div>
+                        <div style="background: #0f172a; padding: 16px; border-radius: 8px;">
+                            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">GENDER</div>
+                            <div style="font-weight: 600;">${trainer.trainer_gender}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTrainerComparisons(trainer) {
+            const programAvg = DEMO_DATA.program.average;
+            const district = DEMO_DATA.districts.find(d => d.name === trainer.district_name);
+            const districtAvg = district ? district.average : programAvg;
+            
+            const site = DEMO_DATA.sites.find(s => s.name === trainer.training_site);
+            const siteTrainers = DEMO_DATA.trainers.filter(t => t.training_site === trainer.training_site);
+            const siteAvg = site ? site.average : (siteTrainers.reduce((sum, t) => sum + t.stats.average_score, 0) / siteTrainers.length);
+            
+            const genderPeers = DEMO_DATA.trainers.filter(t => t.trainer_gender === trainer.trainer_gender);
+            const genderAvg = genderPeers.reduce((sum, t) => sum + t.stats.average_score, 0) / genderPeers.length;
+            
+            return `
+                <div class="section">
+                    <h3 class="section-title">📊 Performance Comparisons</h3>
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <div class="comparison-header">
+                                <div class="comparison-icon">🌍</div>
+                                <div class="comparison-label">vs Program Average</div>
+                            </div>
+                            <div class="comparison-scores">
+                                <div class="comparison-main-score score-${getScoreColor(trainer.stats.average_score)}">${trainer.stats.average_score.toFixed(2)}</div>
+                                <div class="comparison-vs">vs</div>
+                                <div class="comparison-compare-score">${programAvg.toFixed(2)}</div>
+                            </div>
+                            <div class="comparison-meta">
+                                <span style="color: ${trainer.stats.average_score >= programAvg ? '#10b981' : '#ef4444'};">
+                                    ${trainer.stats.average_score >= programAvg ? '+' : ''}${(trainer.stats.average_score - programAvg).toFixed(2)}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-card">
+                            <div class="comparison-header">
+                                <div class="comparison-icon">📍</div>
+                                <div class="comparison-label">vs District Average</div>
+                            </div>
+                            <div class="comparison-scores">
+                                <div class="comparison-main-score score-${getScoreColor(trainer.stats.average_score)}">${trainer.stats.average_score.toFixed(2)}</div>
+                                <div class="comparison-vs">vs</div>
+                                <div class="comparison-compare-score">${districtAvg.toFixed(2)}</div>
+                            </div>
+                            <div class="comparison-meta">
+                                <span style="color: ${trainer.stats.average_score >= districtAvg ? '#10b981' : '#ef4444'};">
+                                    ${trainer.stats.average_score >= districtAvg ? '+' : ''}${(trainer.stats.average_score - districtAvg).toFixed(2)}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-card">
+                            <div class="comparison-header">
+                                <div class="comparison-icon">🏫</div>
+                                <div class="comparison-label">vs Site Average</div>
+                            </div>
+                            <div class="comparison-scores">
+                                <div class="comparison-main-score score-${getScoreColor(trainer.stats.average_score)}">${trainer.stats.average_score.toFixed(2)}</div>
+                                <div class="comparison-vs">vs</div>
+                                <div class="comparison-compare-score">${siteAvg.toFixed(2)}</div>
+                            </div>
+                            <div class="comparison-meta">
+                                <span style="color: ${trainer.stats.average_score >= siteAvg ? '#10b981' : '#ef4444'};">
+                                    ${trainer.stats.average_score >= siteAvg ? '+' : ''}${(trainer.stats.average_score - siteAvg).toFixed(2)}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-card">
+                            <div class="comparison-header">
+                                <div class="comparison-icon">${trainer.trainer_gender === 'Male' ? '👨' : '👩'}</div>
+                                <div class="comparison-label">vs ${trainer.trainer_gender} Peers</div>
+                            </div>
+                            <div class="comparison-scores">
+                                <div class="comparison-main-score score-${getScoreColor(trainer.stats.average_score)}">${trainer.stats.average_score.toFixed(2)}</div>
+                                <div class="comparison-vs">vs</div>
+                                <div class="comparison-compare-score">${genderAvg.toFixed(2)}</div>
+                            </div>
+                            <div class="comparison-meta">
+                                <span style="color: ${trainer.stats.average_score >= genderAvg ? '#10b981' : '#ef4444'};">
+                                    ${trainer.stats.average_score >= genderAvg ? '+' : ''}${(trainer.stats.average_score - genderAvg).toFixed(2)}
+                                </span>
+                                <span>${genderPeers.length} peers</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">📈 Competency Comparison vs Program</h3>
+                    ${Object.entries(trainer.stats.competencies).map(([comp, score]) => {
+                        // Calculate program average for this competency
+                        const programCompAvg = DEMO_DATA.trainers.reduce((sum, t) => sum + t.stats.competencies[comp], 0) / DEMO_DATA.trainers.length;
+                        const diff = score - programCompAvg;
+                        
+                        return `
+                            <div style="margin-bottom: 16px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 13px; font-weight: 500;">${comp}</span>
+                                    <span style="font-size: 13px; color: ${diff >= 0 ? '#10b981' : '#ef4444'};">
+                                        ${diff >= 0 ? '+' : ''}${diff.toFixed(2)} vs program
+                                    </span>
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <div style="flex: 1; height: 8px; background: #0f172a; border-radius: 4px; overflow: hidden;">
+                                        <div style="height: 100%; width: ${(score/5)*100}%; background: ${diff >= 0 ? '#10b981' : '#f59e0b'};"></div>
+                                    </div>
+                                    <span style="font-size: 13px; font-weight: bold; min-width: 35px; text-align: right;" class="score-${getScoreColor(score)}">
+                                        ${score.toFixed(2)}
+                                    </span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">🏆 Ranking</h3>
+                    ${(() => {
+                        const allTrainers = DEMO_DATA.trainers.sort((a, b) => b.stats.average_score - a.stats.average_score);
+                        const rank = allTrainers.findIndex(t => t.trainer_id === trainer.trainer_id) + 1;
+                        const percentile = ((DEMO_DATA.trainers.length - rank) / DEMO_DATA.trainers.length * 100).toFixed(0);
+                        
+                        return `
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                                <div style="background: #0f172a; padding: 20px; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 32px; font-weight: bold; color: ${rank <= 3 ? '#fbbf24' : '#f97316'};">
+                                        #${rank}
+                                    </div>
+                                    <div style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Program Rank</div>
+                                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">out of ${DEMO_DATA.trainers.length}</div>
+                                </div>
+                                <div style="background: #0f172a; padding: 20px; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 32px; font-weight: bold; color: #f97316;">
+                                        ${percentile}%
+                                    </div>
+                                    <div style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Percentile</div>
+                                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">top ${percentile}%</div>
+                                </div>
+                                <div style="background: #0f172a; padding: 20px; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold; color: ${trainer.stats.trend === 'improving' ? '#10b981' : trainer.stats.trend === 'declining' ? '#ef4444' : '#94a3b8'};">
+                                        ${trainer.stats.trend === 'improving' ? '📈' : trainer.stats.trend === 'declining' ? '📉' : '➡️'}
+                                    </div>
+                                    <div style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Trend</div>
+                                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">${trainer.stats.trend}</div>
+                                </div>
+                            </div>
+                        `;
+                    })()}
+                </div>
+            `;
+        }
+
+        function renderTrainerInsights(trainer, analysis) {
+            if (!analysis) {
+                return `<div class="section"><p>Loading insights...</p></div>`;
+            }
+            
+            const urgencyColor = analysis.urgency === 'immediate' ? '#ef4444' : 
+                                 analysis.urgency === 'short-term' ? '#f59e0b' : '#10b981';
+            
+            // Get site and district for context
+            const site = DEMO_DATA.sites.find(s => s.name === trainer.training_site);
+            const district = DEMO_DATA.districts.find(d => d.name === trainer.district_name);
+            const programAvg = DEMO_DATA.program.average;
+            
+            // Calculate rankings
+            const siteTrainers = DEMO_DATA.trainers.filter(t => t.training_site === trainer.training_site);
+            const districtTrainers = DEMO_DATA.trainers.filter(t => t.district_name === trainer.district_name);
+            
+            const siteRank = siteTrainers.sort((a, b) => b.stats.average_score - a.stats.average_score)
+                .findIndex(t => t.trainer_id === trainer.trainer_id) + 1;
+            const districtRank = districtTrainers.sort((a, b) => b.stats.average_score - a.stats.average_score)
+                .findIndex(t => t.trainer_id === trainer.trainer_id) + 1;
+            
+            // Find top 2 and bottom 2 competencies
+            const compEntries = Object.entries(trainer.stats.competencies).sort((a, b) => b[1] - a[1]);
+            const topComps = compEntries.slice(0, 2);
+            const bottomComps = compEntries.slice(-2);
+            
+            // Calculate score change
+            if (trainer.observations.length >= 2) {
+                const firstScore = trainer.observations[0].score;
+                const lastScore = trainer.observations[trainer.observations.length - 1].score;
+                var scoreChange = lastScore - firstScore;
+            } else {
+                var scoreChange = 0;
+            }
+            
+            // Get observer comments
+            const hasComments = trainer.all_comments && trainer.all_comments.length > 0;
+            const strengthComments = hasComments ? trainer.all_comments.filter(c => c.type === 'strength').slice(0, 2) : [];
+            const weaknessComments = hasComments ? trainer.all_comments.filter(c => c.type === 'weakness').slice(0, 3) : [];
+            
+            return `
+                <div style="margin-bottom: 20px; display: flex; gap: 12px; align-items: center; padding: 16px; background: #1e293b; border-radius: 8px;">
+                    <div style="flex: 1;">
+                        <div style="color: #94a3b8; font-size: 13px; margin-bottom: 4px;">Analysis Mode</div>
+                        <div style="color: #e2e8f0; font-weight: 600;">Rule-Based Quick Insights</div>
+                        <div style="color: #64748b; font-size: 12px; margin-top: 2px;">Instant analysis using predefined criteria</div>
+                    </div>
+                    <button onclick="generateClaudeDeepDive('${trainer.trainer_id}')" 
+                            style="padding: 12px 24px; background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; transition: all 0.3s; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(139, 92, 246, 0.4)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.3)'">
+                        <span style="font-size: 18px;">🤖</span>
+                        <span>Deep Dive with Claude AI</span>
+                    </button>
+                </div>
+                
+                <div id="claude-insights-container"></div>
+                
+                <div class="section">
+                    <h3 class="section-title">📋 Executive Summary</h3>
+                    <div style="background: #0f172a; padding: 20px; border-radius: 8px; line-height: 1.8; color: #cbd5e1;">
+                        <strong>${trainer.trainer_name}</strong> is a ${trainer.trainer_gender} trainer at <strong>${trainer.training_site}</strong> in <strong>${trainer.district_name}</strong>. 
+                        Based on <strong>${trainer.stats.observation_count} observations</strong>, their overall average is <strong class="score-${getScoreColor(trainer.stats.average_score)}">${trainer.stats.average_score.toFixed(2)}/5.0 (${getScoreLabel(trainer.stats.average_score)})</strong>. 
+                        They rank <strong>#${districtRank} of ${districtTrainers.length} trainers</strong> in ${trainer.district_name}.
+                        <br><br>
+                        <strong>KEY STRENGTHS:</strong> ${topComps.map(([name, score]) => `${score.toFixed(1)} in ${name}`).join(' and ')}.
+                        <br>
+                        <strong>DEVELOPMENT PRIORITIES:</strong> ${bottomComps.map(([name, score]) => `${name} (${score.toFixed(1)})`).join(' and ')}.
+                        <br>
+                        <strong>TRAJECTORY:</strong> ${
+                            scoreChange > 0.2 ? `Positive growth of +${scoreChange.toFixed(2)} points - strong momentum` :
+                            scoreChange < -0.2 ? `Moderate decline of ${scoreChange.toFixed(2)} points - monitor closely` :
+                            'Stable performance - maintain consistency'
+                        }
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">⚡ Intervention Urgency</h3>
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
+                        <span style="padding: 8px 16px; background: ${urgencyColor}; color: white; border-radius: 20px; font-weight: bold; font-size: 14px;">
+                            ${analysis.urgency.toUpperCase()}
+                        </span>
+                        <span style="color: #94a3b8;">
+                            ${analysis.urgency === 'immediate' ? 'Declining performance or critical skill gaps require immediate intervention' :
+                              analysis.urgency === 'short-term' ? 'Some areas need focused support within 2-3 weeks' :
+                              'Continue regular monitoring and positive reinforcement'}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">💪 Key Strengths</h3>
+                    ${topComps.map(([name, score]) => `
+                        <div style="background: #064e3b; border-left: 4px solid #10b981; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                            <div style="font-weight: 600; color: #10b981; margin-bottom: 8px;">${name} (${score.toFixed(2)}/5.0)</div>
+                            <div style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+                                ${name} is a key strength at ${score.toFixed(2)}/5.0 - ${score >= 4.0 ? 'excellent' : 'solid'} performance. 
+                                Continue reinforcing these skills. 
+                                ${trainer.stats.trend === 'improving' ? 'Showing positive growth trajectory.' : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                    
+                    ${strengthComments.length > 0 ? `
+                        <div style="background: #0f172a; padding: 16px; border-radius: 8px; margin-top: 12px;">
+                            <div style="font-weight: 600; color: #10b981; margin-bottom: 12px;">Observer Noted: Positive Feedback</div>
+                            ${strengthComments.map(comment => `
+                                <div style="margin-bottom: 12px;">
+                                    <div style="color: #cbd5e1; font-style: italic; line-height: 1.6;">
+                                        "${comment.text.substring(0, 150)}${comment.text.length > 150 ? '...' : ''}"
+                                    </div>
+                                    <div style="color: #64748b; font-size: 12px; margin-top: 4px;">
+                                        ${comment.week} • ${comment.observer}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">🎯 Development Areas</h3>
+                    ${bottomComps.map(([name, score]) => {
+                        const priority = score < 3.0 ? 'HIGH' : score < 3.5 ? 'MEDIUM' : 'LOW';
+                        const bgColor = priority === 'HIGH' ? '#7f1d1d' : priority === 'MEDIUM' ? '#78350f' : '#1e3a8a';
+                        const borderColor = priority === 'HIGH' ? '#ef4444' : priority === 'MEDIUM' ? '#f59e0b' : '#3b82f6';
+                        const textColor = priority === 'HIGH' ? '#ef4444' : priority === 'MEDIUM' ? '#fbbf24' : '#60a5fa';
+                        
+                        return `
+                            <div style="background: ${bgColor}; border-left: 4px solid ${borderColor}; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="font-weight: 600; color: ${textColor};">${name} (${score.toFixed(2)}/5.0)</div>
+                                    <span style="background: ${borderColor}; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">
+                                        ${priority}
+                                    </span>
+                                </div>
+                                <div style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
+                                    ${name} needs development at ${score.toFixed(2)}/5.0 - should be prioritized for improvement.
+                                    ${trainer.stats.trend === 'declining' ? ' CONCERN: This area is declining and needs attention.' : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                    
+                    ${weaknessComments.length > 0 ? `
+                        ${weaknessComments.map(comment => `
+                            <div style="background: #7f1d1d; border-left: 4px solid #ef4444; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="font-weight: 600; color: #ef4444;">Recurring Issue: Development Area</div>
+                                    <span style="background: #ef4444; color: white; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">
+                                        MEDIUM
+                                    </span>
+                                </div>
+                                <div style="color: #cbd5e1; font-size: 14px; line-height: 1.6; font-style: italic;">
+                                    "${comment.text.substring(0, 150)}${comment.text.length > 150 ? '...' : ''}"
+                                </div>
+                                <div style="color: #94a3b8; font-size: 12px; margin-top: 8px;">
+                                    ${comment.week} • ${comment.observer}
+                                </div>
+                            </div>
+                        `).join('')}
+                    ` : ''}
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">📝 Improvement Plan for Observer</h3>
+                    <div style="color: #94a3b8; margin-bottom: 20px; font-size: 14px;">
+                        Use this plan when coaching the trainer:
+                    </div>
+                    
+                    ${analysis.actionPlan.map((action, i) => {
+                        const isWeakest = i === 0 && bottomComps.length > 0;
+                        const weakestComp = isWeakest ? bottomComps[0] : null;
+                        const isSecondary = i === 1 && bottomComps.length > 1;
+                        const secondComp = isSecondary ? bottomComps[1] : null;
+                        const isStrength = action.toLowerCase().includes('leverage');
+                        const strongestComp = isStrength && topComps.length > 0 ? topComps[0] : null;
+                        
+                        let priority, timeline, title, current, target;
+                        
+                        if (isWeakest && weakestComp) {
+                            priority = 'IMMEDIATE';
+                            timeline = 'Next 2 sessions';
+                            title = weakestComp[0];
+                            current = weakestComp[1].toFixed(2);
+                            target = (parseFloat(current) + 0.5).toFixed(2);
+                        } else if (isSecondary && secondComp) {
+                            priority = 'SHORT-TERM';
+                            timeline = 'Within 4 sessions';
+                            title = secondComp[0];
+                            current = secondComp[1].toFixed(2);
+                            target = (parseFloat(current) + 0.5).toFixed(2);
+                        } else if (isStrength && strongestComp) {
+                            priority = 'LEVERAGE STRENGTH';
+                            timeline = 'Ongoing';
+                            title = strongestComp[0];
+                            current = strongestComp[1].toFixed(2);
+                            target = 'null';
+                        } else if (i === analysis.actionPlan.length - 1) {
+                            priority = 'COACHING APPROACH';
+                            timeline = 'Next 1:1 meeting';
+                            title = 'Feedback Conversation Guide';
+                        } else {
+                            priority = 'PATTERN TO ADDRESS';
+                            timeline = 'Ongoing monitoring';
+                            title = 'Development Focus';
+                        }
+                        
+                        const priorityColor = priority === 'IMMEDIATE' ? '#ef4444' :
+                                            priority === 'SHORT-TERM' ? '#f59e0b' :
+                                            priority === 'LEVERAGE STRENGTH' ? '#10b981' : '#3b82f6';
+                        
+                        return `
+                            <div style="background: #0f172a; padding: 20px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid ${priorityColor};">
+                                <div style="display: flex; align-items: start; gap: 16px;">
+                                    <div style="background: ${priorityColor}; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">
+                                        ${i + 1}
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                            <span style="background: ${priorityColor}; color: white; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                                                ${priority}
+                                            </span>
+                                            <span style="color: #64748b; font-size: 12px;">
+                                                ⏱️ ${timeline}
+                                            </span>
+                                        </div>
+                                        
+                                        <h4 style="color: #e2e8f0; font-size: 16px; margin-bottom: 8px;">${title}</h4>
+                                        
+                                        ${current ? `
+                                            <div style="color: #94a3b8; font-size: 13px; margin-bottom: 12px;">
+                                                Current: <strong style="color: ${getScoreColor(parseFloat(current)) === 'needs-support' || getScoreColor(parseFloat(current)) === 'developing' ? '#ef4444' : '#fbbf24'}">${current}/5.0</strong> 
+                                                → Target: <strong style="color: #10b981">${target}/5.0</strong>
+                                            </div>
+                                        ` : ''}
+                                        
+                                        <div style="color: #cbd5e1; font-size: 14px; margin-bottom: 12px; line-height: 1.6;">
+                                            ${isWeakest ? `This is ${trainer.trainer_name}'s weakest area at ${current}/5.0, which is below target.` :
+                                              isSecondary ? `Secondary development area at ${current}/5.0.` :
+                                              isStrength ? `This is ${trainer.trainer_name}'s strongest area at ${current}/5.0.` :
+                                              priority === 'COACHING APPROACH' ? 'Use this structure when meeting with the trainer:' :
+                                              ''}
+                                        </div>
+                                        
+                                        <div style="background: #1e293b; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+                                            <div style="color: #94a3b8; font-size: 12px; font-weight: 600; margin-bottom: 8px;">ACTION STEPS:</div>
+                                            <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; font-size: 13px; line-height: 1.8;">
+                                                ${isWeakest ? `
+                                                    <li>Schedule brief check-ins with struggling youth after sessions</li>
+                                                    <li>Practice asking open-ended coaching questions</li>
+                                                    <li>Develop a system to track individual youth progress</li>
+                                                ` : isSecondary ? `
+                                                    <li>Actively monitor this competency in next observations</li>
+                                                    <li>Provide specific examples and techniques</li>
+                                                ` : isStrength ? `
+                                                    <li>Recognize and affirm strong performance in ${title}</li>
+                                                    <li>Ask trainer to share techniques with peers who struggle in this area</li>
+                                                    <li>Use strength in ${title} to build confidence while working on weaker areas</li>
+                                                ` : priority === 'COACHING APPROACH' ? `
+                                                    <li>START POSITIVE: 'I noticed your strength in ${topComps[0] ? topComps[0][0] : 'your work'}...'</li>
+                                                    <li>IDENTIFY GROWTH AREA: 'One area to develop is ${bottomComps[0] ? bottomComps[0][0] : 'this skill'}...'</li>
+                                                    <li>COLLABORATE: 'What support would help you improve in this area?'</li>
+                                                    <li>SET SPECIFIC GOAL: 'Let's aim for [specific target] by [specific date]'</li>
+                                                    <li>SCHEDULE FOLLOW-UP: 'I'll observe again on [date] to see progress'</li>
+                                                ` : `
+                                                    <li>Discuss specific instances with trainer</li>
+                                                    <li>Co-create a personal action plan to address this pattern</li>
+                                                    <li>Monitor progress in next 2 observations</li>
+                                                `}
+                                            </ul>
+                                        </div>
+                                        
+                                        ${isWeakest || isSecondary ? `
+                                            <div style="background: #1e3a8a; padding: 10px 12px; border-radius: 6px; margin-bottom: 8px;">
+                                                <div style="color: #60a5fa; font-size: 12px; font-weight: 600;">
+                                                    💡 Coaching Tip: ${isWeakest ? 'Role-play a coaching conversation - observe how trainer responds to youth challenges' : 'Count participation by gender during observation - share the data with trainer'}
+                                                </div>
+                                            </div>
+                                        ` : ''}
+                                        
+                                        <div style="color: #10b981; font-size: 13px; font-weight: 600;">
+                                            🎯 Success Metric: ${
+                                                isWeakest || isSecondary ? `Achieve ${target}/5.0 in ${title}` :
+                                                isStrength ? 'Maintain excellence while transferring skills to peers' :
+                                                priority === 'COACHING APPROACH' ? 'Trainer leaves with clear understanding of strengths, growth areas, and action plan' :
+                                                'No recurring issues noted in next 2 observations'
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                
+                <div class="section">
+                    <h3 class="section-title">✅ Observer Action Items</h3>
+                    <div style="background: #0f172a; padding: 20px; border-radius: 8px;">
+                        <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; line-height: 2; font-size: 14px;">
+                            <li>Schedule 1:1 feedback session with ${trainer.trainer_name} within the next week</li>
+                            <li>Focus observation on ${bottomComps[0] ? bottomComps[0][0] : 'development areas'} in next visit</li>
+                            <li>Recognize and reinforce strength in ${topComps[0] ? topComps[0][0] : 'key areas'}</li>
+                            <li>Document progress on improvement plan after each observation</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ==================== CLAUDE AI INTEGRATION ====================
+        async function generateClaudeDeepDive(trainerId) {
+            const trainer = DEMO_DATA.trainers.find(t => t.trainer_id === trainerId);
+            if (!trainer) return;
+            
+            const container = document.getElementById('claude-insights-container');
+            
+            // Show loading state
+            container.innerHTML = `
+                <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); padding: 24px; border-radius: 12px; margin-bottom: 24px; border: 2px solid #6366f1;">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                        <div style="width: 48px; height: 48px; border: 4px solid #6366f1; border-top-color: #8b5cf6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <div>
+                            <div style="color: #e0e7ff; font-weight: 600; font-size: 16px; margin-bottom: 4px;">🤖 Claude AI is analyzing...</div>
+                            <div style="color: #a5b4fc; font-size: 13px;">Reading ${trainer.stats.observation_count} observations and ${trainer.all_comments ? trainer.all_comments.length : 0} observer comments</div>
+                        </div>
+                    </div>
+                    <style>
+                        @keyframes spin { to { transform: rotate(360deg); } }
+                    </style>
+                </div>
+            `;
+            
+            try {
+                // Prepare data for Claude
+                const prompt = `You are an expert education coach analyzing trainer performance data for the E!BA (Educate! Bootcamp Accelerator) program in Uganda.
+
+TRAINER PROFILE:
+- Name: ${trainer.trainer_name}
+- Gender: ${trainer.trainer_gender}
+- Site: ${trainer.training_site}
+- District: ${trainer.district_name}
+- Overall Score: ${trainer.stats.average_score.toFixed(2)}/5.0 (${getScoreLabel(trainer.stats.average_score)})
+- Total Observations: ${trainer.stats.observation_count}
+- Trend: ${trainer.stats.trend}
+
+COMPETENCY SCORES (1-5 scale):
+${Object.entries(trainer.stats.competencies).map(([name, score]) => `- ${name}: ${score.toFixed(2)}/5.0`).join('\n')}
+
+OBSERVATION HISTORY:
+${trainer.observations.map((obs, i) => `${i + 1}. ${obs.date} (${obs.week}): Score ${obs.score.toFixed(2)}/5.0 - Observer: ${obs.observer}`).join('\n')}
+
+${trainer.all_comments && trainer.all_comments.length > 0 ? `
+OBSERVER COMMENTS:
+Strengths:
+${trainer.all_comments.filter(c => c.type === 'strength').map(c => `- "${c.text}" (${c.week}, ${c.observer})`).join('\n')}
+
+Areas for Development:
+${trainer.all_comments.filter(c => c.type === 'weakness').map(c => `- "${c.text}" (${c.week}, ${c.observer})`).join('\n')}
+
+General Feedback:
+${trainer.all_comments.filter(c => c.type === 'overall').map(c => `- "${c.text}" (${c.week}, ${c.observer})`).join('\n')}
+` : ''}
+
+Please provide a comprehensive coaching analysis with:
+1. A nuanced assessment of this trainer's performance, considering both quantitative scores and qualitative feedback
+2. Specific, actionable coaching strategies tailored to this individual
+3. Insights into patterns you notice across observations
+4. Recommendations for the observer on how to support this trainer's development
+5. Any cultural or contextual considerations for coaching in Uganda
+
+Be specific, empathetic, and action-oriented. Focus on what the observer should DO in their next coaching session.`;
+
+                // Call Claude API
+                const response = await fetch("https://api.anthropic.com/v1/messages", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        model: "claude-sonnet-4-20250514",
+                        max_tokens: 4000,
+                        messages: [
+                            { role: "user", content: prompt }
+                        ],
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message || 'Claude API error');
+                }
+                
+                const claudeResponse = data.content
+                    .filter(item => item.type === 'text')
+                    .map(item => item.text)
+                    .join('\n');
+
+                // Display Claude's insights
+                container.innerHTML = `
+                    <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); padding: 24px; border-radius: 12px; margin-bottom: 24px; border: 2px solid #8b5cf6; box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 32px;">🤖</span>
+                                <div>
+                                    <div style="color: #e0e7ff; font-weight: 600; font-size: 18px;">Claude AI Deep Dive Analysis</div>
+                                    <div style="color: #a5b4fc; font-size: 13px;">Personalized coaching insights for ${trainer.trainer_name}</div>
+                                </div>
+                            </div>
+                            <button onclick="document.getElementById('claude-insights-container').innerHTML=''" 
+                                    style="padding: 8px 16px; background: rgba(255,255,255,0.1); color: #e0e7ff; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; font-size: 12px;">
+                                ✕ Close
+                            </button>
+                        </div>
+                        <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; color: #e0e7ff; line-height: 1.8; white-space: pre-wrap; font-size: 14px;">
+${claudeResponse}
+                        </div>
+                        <div style="margin-top: 16px; padding: 12px; background: rgba(139, 92, 246, 0.2); border-radius: 6px; border-left: 4px solid #8b5cf6;">
+                            <div style="color: #c4b5fd; font-size: 12px;">
+                                💡 This analysis was generated by Claude AI based on ${trainer.stats.observation_count} observations and ${trainer.all_comments ? trainer.all_comments.length : 0} observer comments. Use it alongside the rule-based insights above for a comprehensive coaching approach.
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Claude API Error:', error);
+                container.innerHTML = `
+                    <div style="background: #7f1d1d; padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 2px solid #ef4444;">
+                        <div style="color: #fecaca; font-weight: 600; margin-bottom: 12px;">🔐 Claude AI Deep Dive Requires API Configuration</div>
+                        <div style="color: #fca5a5; font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
+                            <p style="margin-bottom: 8px;">The Claude AI Deep Dive feature requires an Anthropic API key, which cannot be stored in the browser for security reasons.</p>
+                            
+                            <p style="margin-bottom: 8px;"><strong>Options to enable this feature:</strong></p>
+                            <ol style="margin-left: 20px; margin-bottom: 12px;">
+                                <li>Add API key to your Google Apps Script backend (recommended for production)</li>
+                                <li>Use the rule-based insights below (available now, no setup required)</li>
+                            </ol>
+                            
+                            <p style="font-size: 13px; color: #fbbf24;">💡 The rule-based insights provide comprehensive, actionable recommendations and work instantly without any API setup.</p>
+                        </div>
+                        <button onclick="document.getElementById('claude-insights-container').innerHTML=''" 
+                                style="margin-top: 12px; padding: 8px 16px; background: rgba(255,255,255,0.1); color: #fecaca; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; font-size: 12px;">
+                            Close
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        function getScoreGradient(score) {
+            if (score >= 4.5) return '#10b981, #22c55e';
+            if (score >= 4.0) return '#22c55e, #84cc16';
+            if (score >= 3.5) return '#eab308, #fbbf24';
+            if (score >= 3.0) return '#f59e0b, #fb923c';
+            return '#ef4444, #f87171';
+        }
+
+        // Lesson Observation Form - Opens in new window
+        function openLessonObservationForm() {
+            // Generate a unique case ID based on timestamp
+            const caseId = `case_${Date.now()}`;
+            const surveyUrl = `https://expeducate.surveycto.com/collect/eba_2025_monitoring_tool_v2?caseid=${caseId}`;
+            
+            // Open in new window with specific dimensions
+            const width = 1200;
+            const height = 800;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            
+            window.open(
+                surveyUrl,
+                'LessonObservationForm',
+                `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=yes`
+            );
+        }
+
+        // Initialize
+        init();
+        renderTrainerList();
+    </script>
+</body>
+</html>
