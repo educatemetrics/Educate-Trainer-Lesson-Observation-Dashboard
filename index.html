@@ -6,14 +6,14 @@
     <title>Trainer Performance Dashboard - Educate!</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #0e313e; color: #e2e8f0; min-height: 100vh; }
         
         /* Header */
-        .header { background: #1e293b; padding: 16px 24px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-        .header h1 { color: #f97316; font-size: 24px; }
+        .header { background: #1a2730; padding: 16px 24px; border-bottom: 1px solid #4D889D; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        .header h1 { color: #F1A01B; font-size: 24px; }
         .header-subtitle { color: #94a3b8; font-size: 14px; }
         .header-stats { display: flex; gap: 16px; }
-        .stat-card { background: #0f172a; padding: 12px 16px; border-radius: 8px; border-left: 4px solid; min-width: 100px; }
+        .stat-card { background: #0e313e; padding: 12px 16px; border-radius: 8px; border-left: 4px solid; min-width: 100px; }
         .stat-value { font-size: 24px; font-weight: bold; }
         .stat-label { font-size: 12px; color: #94a3b8; }
         
@@ -21,25 +21,25 @@
         .main-container { display: flex; height: calc(100vh - 140px); }
         
         /* Sidebar */
-        .sidebar { width: 300px; background: #1e293b; border-right: 1px solid #334155; display: flex; flex-direction: column; overflow: hidden; }
-        .filter-section { padding: 16px; border-bottom: 1px solid #334155; }
+        .sidebar { width: 300px; background: #1a2730; border-right: 1px solid #4D889D; display: flex; flex-direction: column; overflow: hidden; }
+        .filter-section { padding: 16px; border-bottom: 1px solid #4D889D; }
         .filter-title { font-size: 12px; color: #94a3b8; text-transform: uppercase; margin-bottom: 12px; }
-        .filter-select { width: 100%; padding: 10px 12px; margin-bottom: 8px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #e2e8f0; font-size: 14px; cursor: pointer; }
-        .filter-select:hover { border-color: #f97316; }
+        .filter-select { width: 100%; padding: 10px 12px; margin-bottom: 8px; background: #0e313e; border: 1px solid #4D889D; border-radius: 6px; color: #e2e8f0; font-size: 14px; cursor: pointer; }
+        .filter-select:hover { border-color: #F1A01B; }
         .clear-btn { width: 100%; padding: 8px; background: transparent; border: 1px solid #475569; border-radius: 6px; color: #94a3b8; cursor: pointer; margin-top: 4px; }
-        .clear-btn:hover { background: #334155; }
+        .clear-btn:hover { background: #4D889D; }
         
         /* Breadcrumb */
-        .breadcrumb { padding: 12px 16px; background: #0f172a; border-bottom: 1px solid #334155; font-size: 13px; color: #94a3b8; }
-        .breadcrumb span { cursor: pointer; }
-        .breadcrumb span:hover { color: #f97316; }
-        .breadcrumb .active { color: #f97316; font-weight: 600; }
+        .breadcrumb { font-size: 14px; color: #94a3b8; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .breadcrumb span { cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: all 0.2s; }
+        .breadcrumb span:hover { color: #F1A01B; background: rgba(249, 115, 22, 0.1); }
+        .breadcrumb .active { color: #F1A01B; font-weight: 600; background: rgba(249, 115, 22, 0.15); }
         
         /* Trainer List */
         .trainer-list { flex: 1; overflow-y: auto; padding: 16px; }
         .list-title { font-size: 14px; color: #94a3b8; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .trainer-card { background: #0f172a; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 4px solid #6b7280; cursor: pointer; transition: all 0.2s; }
-        .trainer-card:hover, .trainer-card.selected { background: #334155; transform: translateX(4px); }
+        .trainer-card { background: #0e313e; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 4px solid #6b7280; cursor: pointer; transition: all 0.2s; }
+        .trainer-card:hover, .trainer-card.selected { background: #4D889D; transform: translateX(4px); }
         .trainer-card-name { font-weight: 600; margin-bottom: 4px; font-size: 14px; }
         .trainer-card-meta { font-size: 11px; color: #94a3b8; }
         .trainer-card-score { margin-top: 6px; font-size: 16px; font-weight: bold; }
@@ -49,34 +49,34 @@
         .placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; color: #64748b; }
         
         /* View Header */
-        .view-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #1e293b; border-radius: 12px; margin-bottom: 24px; }
+        .view-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #1a2730; border-radius: 12px; margin-bottom: 24px; }
         .view-title { font-size: 24px; font-weight: bold; margin-bottom: 4px; }
         .view-subtitle { color: #94a3b8; font-size: 14px; }
-        .score-circle { width: 100px; height: 100px; border-radius: 50%; background: #0f172a; border: 4px solid #f97316; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .score-circle { width: 100px; height: 100px; border-radius: 50%; background: #0e313e; border: 4px solid #F1A01B; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .score-circle-value { font-size: 28px; font-weight: bold; }
         .score-circle-label { font-size: 11px; color: #94a3b8; }
         
         /* Tabs */
         .tabs { display: flex; gap: 8px; margin-bottom: 24px; }
-        .tab { padding: 10px 20px; background: #1e293b; border: none; border-radius: 8px; color: #94a3b8; cursor: pointer; font-size: 14px; }
-        .tab.active { background: #f97316; color: white; }
-        .tab:hover:not(.active) { background: #334155; }
+        .tab { padding: 10px 20px; background: #1a2730; border: none; border-radius: 8px; color: #94a3b8; cursor: pointer; font-size: 14px; }
+        .tab.active { background: #F1A01B; color: white; }
+        .tab:hover:not(.active) { background: #4D889D; }
         
         /* Tab Content */
-        .tab-content { background: #1e293b; border-radius: 12px; padding: 20px; }
+        .tab-content { background: #1a2730; border-radius: 12px; padding: 20px; }
         .section { margin-bottom: 24px; }
         .section:last-child { margin-bottom: 0; }
-        .section-title { font-size: 16px; color: #f97316; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .section-title { font-size: 16px; color: #F1A01B; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
         
         /* Stats Grid */
         .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
-        .stats-grid-item { background: #0f172a; padding: 16px; border-radius: 8px; text-align: center; }
-        .stats-grid-value { font-size: 28px; font-weight: bold; color: #f97316; }
+        .stats-grid-item { background: #0e313e; padding: 16px; border-radius: 8px; text-align: center; }
+        .stats-grid-value { font-size: 28px; font-weight: bold; color: #F1A01B; }
         .stats-grid-label { font-size: 12px; color: #94a3b8; margin-top: 4px; }
         
         /* Comparison Grid */
         .comparison-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 20px; }
-        .comparison-card { background: #0f172a; padding: 16px; border-radius: 8px; border-left: 4px solid #f97316; }
+        .comparison-card { background: #0e313e; padding: 16px; border-radius: 8px; border-left: 4px solid #F1A01B; }
         .comparison-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
         .comparison-icon { font-size: 20px; }
         .comparison-label { font-size: 12px; color: #94a3b8; text-transform: uppercase; }
@@ -87,50 +87,50 @@
         .comparison-meta { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-top: 8px; }
         
         /* Insight Cards */
-        .insight-card { background: #0f172a; padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid; }
-        .insight-card.strength { border-left-color: #10b981; background: #064e3b15; }
+        .insight-card { background: #0e313e; padding: 16px; border-radius: 8px; margin-bottom: 12px; border-left: 4px solid; }
+        .insight-card.strength { border-left-color: #4F9262; background: #064e3b15; }
         .insight-card.concern { border-left-color: #ef4444; background: #7f1d1d15; }
         .insight-card.warning { border-left-color: #f59e0b; background: #78350f15; }
         .insight-title { font-weight: 600; margin-bottom: 8px; font-size: 14px; }
-        .insight-title.strength { color: #10b981; }
+        .insight-title.strength { color: #4F9262; }
         .insight-title.concern { color: #ef4444; }
         .insight-title.warning { color: #f59e0b; }
         .insight-text { font-size: 13px; line-height: 1.6; color: #cbd5e1; }
         
         /* Action Steps */
-        .action-step { background: #0f172a; padding: 16px; border-radius: 8px; margin-bottom: 12px; display: flex; gap: 16px; }
+        .action-step { background: #0e313e; padding: 16px; border-radius: 8px; margin-bottom: 12px; display: flex; gap: 16px; }
         .step-number { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; color: white; flex-shrink: 0; }
         .step-content { flex: 1; }
         .step-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
         .step-priority { font-weight: 600; font-size: 12px; }
         .step-timeline { font-size: 12px; color: #94a3b8; }
-        .step-focus { font-weight: 600; margin-bottom: 8px; color: #f97316; }
-        .step-actions { background: #1e293b; padding: 12px; border-radius: 6px; margin-top: 8px; }
-        .step-actions-title { font-size: 11px; color: #f97316; font-weight: 600; margin-bottom: 8px; }
+        .step-focus { font-weight: 600; margin-bottom: 8px; color: #F1A01B; }
+        .step-actions { background: #1a2730; padding: 12px; border-radius: 6px; margin-top: 8px; }
+        .step-actions-title { font-size: 11px; color: #F1A01B; font-weight: 600; margin-bottom: 8px; }
         .step-actions-list { margin-left: 20px; font-size: 13px; line-height: 1.8; }
-        .success-metric { font-size: 12px; color: #10b981; margin-top: 8px; padding: 8px; background: #064e3b15; border-radius: 4px; }
+        .success-metric { font-size: 12px; color: #4F9262; margin-top: 8px; padding: 8px; background: #064e3b15; border-radius: 4px; }
         
         /* Competency Bars */
         .competency-item { display: grid; grid-template-columns: 180px 1fr 60px; align-items: center; gap: 12px; margin-bottom: 12px; }
         .competency-label { font-size: 13px; }
-        .competency-bar { height: 8px; background: #0f172a; border-radius: 4px; overflow: hidden; }
+        .competency-bar { height: 8px; background: #0e313e; border-radius: 4px; overflow: hidden; }
         .competency-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
         .competency-score { text-align: right; font-weight: bold; }
         
         /* Colors */
-        .score-exceptional { color: #10b981; }
+        .score-exceptional { color: #4F9262; }
         .score-strong { color: #22c55e; }
         .score-adequate { color: #eab308; }
         .score-developing { color: #f59e0b; }
         .score-needs-support { color: #ef4444; }
         
-        .fill-exceptional { background: linear-gradient(90deg, #10b981, #22c55e); }
+        .fill-exceptional { background: linear-gradient(90deg, #4F9262, #22c55e); }
         .fill-strong { background: linear-gradient(90deg, #22c55e, #84cc16); }
         .fill-adequate { background: linear-gradient(90deg, #eab308, #fbbf24); }
         .fill-developing { background: linear-gradient(90deg, #f59e0b, #fb923c); }
         .fill-needs-support { background: linear-gradient(90deg, #ef4444, #f87171); }
         
-        .border-exceptional { border-left-color: #10b981; }
+        .border-exceptional { border-left-color: #4F9262; }
         .border-strong { border-left-color: #22c55e; }
         .border-adequate { border-left-color: #eab308; }
         .border-developing { border-left-color: #f59e0b; }
@@ -138,14 +138,14 @@
         
         /* Loading */
         .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px; color: #94a3b8; }
-        .spinner { width: 40px; height: 40px; border: 4px solid #334155; border-top-color: #f97316; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #4D889D; border-top-color: #F1A01B; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-text { font-size: 14px; }
         
         /* Responsive */
         @media (max-width: 768px) {
             .main-container { flex-direction: column; height: auto; }
-            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #334155; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #4D889D; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .comparison-grid { grid-template-columns: 1fr; }
         }
@@ -160,16 +160,16 @@
         </div>
         <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
             <!-- Date Range Filter -->
-            <div style="display: flex; gap: 8px; align-items: center; background: #1e293b; padding: 8px 16px; border-radius: 8px; border: 1px solid #334155;">
+            <div style="display: flex; gap: 8px; align-items: center; background: #1a2730; padding: 8px 16px; border-radius: 8px; border: 1px solid #4D889D;">
                 <span style="color: #94a3b8; font-size: 13px; font-weight: 600;">📅 Date Range:</span>
                 <input type="date" id="date-from" onchange="applyDateFilter()" value="2025-11-25"
-                       style="background: #0f172a; border: 1px solid #334155; color: #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                       style="background: #0e313e; border: 1px solid #4D889D; color: #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer;">
                 <span style="color: #64748b;">to</span>
                 <input type="date" id="date-to" onchange="applyDateFilter()" value="2025-12-15"
-                       style="background: #0f172a; border: 1px solid #334155; color: #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                       style="background: #0e313e; border: 1px solid #4D889D; color: #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer;">
             </div>
             
-            <button onclick="openLessonObservationForm()" style="padding: 12px 24px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
+            <button onclick="openLessonObservationForm()" style="padding: 12px 24px; background: #4F9262; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
                 <span style="font-size: 18px;">📝</span>
                 <span>Lesson Observation Form</span>
             </button>
@@ -177,29 +177,53 @@
         </div>
     </div>
     
+    <!-- Horizontal Filters Pane -->
+    <div style="background: #1a2730; border-bottom: 1px solid #4D889D; padding: 16px 32px;">
+        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap; max-width: 1400px; margin: 0 auto;">
+            <!-- Breadcrumb Navigation -->
+            <div style="flex: 1; min-width: 200px;">
+                <div class="breadcrumb" id="breadcrumb">
+                    <span onclick="selectLevel('program')" class="active">🌍 Program</span>
+                </div>
+            </div>
+            
+            <!-- Filters -->
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span style="color: #94a3b8; font-size: 13px; font-weight: 600;">📍</span>
+                    <select class="filter-select" id="district-filter" onchange="selectDistrict()" style="min-width: 150px;">
+                        <option value="">All Districts</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span style="color: #94a3b8; font-size: 13px; font-weight: 600;">🏫</span>
+                    <select class="filter-select" id="site-filter" onchange="selectSite()" style="min-width: 180px;">
+                        <option value="">All Sites</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span style="color: #94a3b8; font-size: 13px; font-weight: 600;">📅</span>
+                    <select class="filter-select" id="week-filter" onchange="selectWeek()" style="min-width: 120px;">
+                        <option value="">All Weeks</option>
+                        <option value="WEEK1">Week 1</option>
+                        <option value="WEEK2">Week 2</option>
+                        <option value="WEEK3">Week 3</option>
+                    </select>
+                </div>
+                
+                <button class="clear-btn" onclick="clearFilters()" style="padding: 8px 16px; background: #4D889D; color: #e2e8f0; border: 1px solid #475569; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;"
+                        onmouseover="this.style.background='#475569'" 
+                        onmouseout="this.style.background='#4D889D'">
+                    Clear Filters
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <div class="main-container">
         <div class="sidebar">
-            <div class="breadcrumb" id="breadcrumb">
-                <span onclick="selectLevel('program')" class="active">🌍 Program</span>
-            </div>
-            
-            <div class="filter-section">
-                <div class="filter-title">Filters</div>
-                <select class="filter-select" id="district-filter" onchange="selectDistrict()">
-                    <option value="">All Districts</option>
-                </select>
-                <select class="filter-select" id="site-filter" onchange="selectSite()">
-                    <option value="">All Sites</option>
-                </select>
-                <select class="filter-select" id="week-filter" onchange="selectWeek()">
-                    <option value="">All Weeks</option>
-                    <option value="WEEK1">Week 1</option>
-                    <option value="WEEK2">Week 2</option>
-                    <option value="WEEK3">Week 3</option>
-                </select>
-                <button class="clear-btn" onclick="clearFilters()">Clear All Filters</button>
-            </div>
-            
             <div class="trainer-list" id="trainer-list"></div>
         </div>
         
@@ -213,7 +237,7 @@
     
     <script>
         // ==================== APPS SCRIPT CONFIGURATION ====================
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx4SxqNVKwprf5IgBWvNHXV9hmiFJRjK7i0QkQZZ5o1WhAWxsgVH_RFor6BdGfQn8aj/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8jmlgSQMUu9E5e4-XYMRy91q4Xvn8qbAI346loKZfDJ_5bSXr0BtUj3AAiEyz13op/exec';
         
         // Global data object - will be populated from Google Sheets via Apps Script
         let DEMO_DATA = {
@@ -349,9 +373,9 @@
             const root = document.getElementById('root');
             if (root) {
                 root.innerHTML = `
-                    <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #0e313e 0%, #1a2730 100%);">
                         <div style="text-align: center;">
-                            <div style="width: 64px; height: 64px; border: 4px solid #334155; border-top-color: #f97316; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
+                            <div style="width: 64px; height: 64px; border: 4px solid #4D889D; border-top-color: #F1A01B; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;"></div>
                             <p style="color: #94a3b8; font-size: 16px; font-weight: 600;">Loading E!BA Dashboard...</p>
                             <p style="color: #64748b; font-size: 13px; margin-top: 8px;">Fetching data from Google Sheets</p>
                         </div>
@@ -374,7 +398,7 @@
             const root = document.getElementById('root');
             if (root) {
                 root.innerHTML = `
-                    <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 2rem;">
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: linear-gradient(135deg, #0e313e 0%, #1a2730 100%); padding: 2rem;">
                         <div style="text-align: center; max-width: 600px;">
                             <div style="font-size: 64px; margin-bottom: 16px;">❌</div>
                             <h2 style="color: #ef4444; margin-bottom: 16px; font-size: 24px;">Failed to Load Data</h2>
@@ -388,7 +412,7 @@
                                 • You have internet connection<br><br>
                                 Check browser console (F12) for detailed error message.
                             </p>
-                            <button onclick="location.reload()" style="padding: 12px 24px; background: #f97316; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
+                            <button onclick="location.reload()" style="padding: 12px 24px; background: #F1A01B; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;">
                                 🔄 Retry
                             </button>
                         </div>
@@ -412,7 +436,7 @@
         function updateHeaderStats() {
             const stats = getCurrentLevelStats();
             document.getElementById('header-stats').innerHTML = `
-                <div class="stat-card" style="border-left-color: #10b981;">
+                <div class="stat-card" style="border-left-color: #4F9262;">
                     <div class="stat-value">${stats.trainers}</div>
                     <div class="stat-label">Trainers</div>
                 </div>
@@ -420,7 +444,7 @@
                     <div class="stat-value">${stats.observations}</div>
                     <div class="stat-label">Observations</div>
                 </div>
-                <div class="stat-card" style="border-left-color: #f97316;">
+                <div class="stat-card" style="border-left-color: #F1A01B;">
                     <div class="stat-value">${stats.average.toFixed(2)}</div>
                     <div class="stat-label">Avg Score</div>
                 </div>
@@ -456,25 +480,27 @@
                 state.selectedDistrict = districtName;
                 state.selectedSite = null;
                 state.selectedTrainer = null;
+                state.activeTab = 'overview';
                 
-                // Update site filter
-                const district = DEMO_DATA.districts.find(d => d.name === districtName);
+                // Update site filter - get sites for this district
                 const siteSelect = document.getElementById('site-filter');
                 siteSelect.innerHTML = '<option value="">All Sites</option>';
-                if (district) {
-                    district.sites.forEach(site => {
-                        const option = document.createElement('option');
-                        option.value = site;
-                        option.textContent = site;
-                        siteSelect.appendChild(option);
-                    });
-                }
+                
+                const districtSites = DEMO_DATA.sites.filter(s => s.district === districtName);
+                districtSites.forEach(site => {
+                    const option = document.createElement('option');
+                    option.value = site.name;
+                    option.textContent = site.name;
+                    siteSelect.appendChild(option);
+                });
                 siteSelect.disabled = false;
             } else {
                 state.level = 'program';
                 state.selectedDistrict = null;
                 state.selectedSite = null;
+                state.activeTab = 'overview';
                 document.getElementById('site-filter').disabled = true;
+                document.getElementById('site-filter').innerHTML = '<option value="">All Sites</option>';
             }
             
             updateHeaderStats();
@@ -490,9 +516,11 @@
                 state.level = 'site';
                 state.selectedSite = siteName;
                 state.selectedTrainer = null;
+                state.activeTab = 'overview';
             } else {
                 state.level = 'district';
                 state.selectedSite = null;
+                state.activeTab = 'overview';
             }
             
             updateHeaderStats();
@@ -603,7 +631,7 @@
             
             // Add date range indicator if filtered
             if (state.dateFrom !== '2025-11-25' || state.dateTo !== '2025-12-15') {
-                breadcrumb += '<br><span style="color: #f97316; font-size: 11px; margin-top: 4px; display: inline-block;">📅 ' + state.dateFrom + ' to ' + state.dateTo + '</span>';
+                breadcrumb += '<br><span style="color: #F1A01B; font-size: 11px; margin-top: 4px; display: inline-block;">📅 ' + state.dateFrom + ' to ' + state.dateTo + '</span>';
             }
             
             document.getElementById('breadcrumb').innerHTML = breadcrumb;
@@ -661,9 +689,9 @@
             }
             
             container.innerHTML = `
-                <div class="list-title">
-                    <span>Trainers (${trainers.length})</span>
-                    <span style="font-size: 11px;">Click to view details</span>
+                <div style="padding: 16px; background: #1a2730; border-bottom: 1px solid #4D889D; margin: -16px -16px 16px -16px;">
+                    <div style="font-size: 16px; font-weight: 600; color: #F1A01B; margin-bottom: 4px;">👥 Trainers</div>
+                    <div style="font-size: 12px; color: #94a3b8;">${trainers.length} trainer${trainers.length !== 1 ? 's' : ''} • Click to view details</div>
                 </div>
                 ${trainers.map(t => `
                     <div class="trainer-card ${state.selectedTrainer === t.trainer_id ? 'selected' : ''} border-${getScoreColor(t.stats.average_score)}" 
@@ -789,7 +817,7 @@
                     <h3 class="section-title">📈 Performance Distribution</h3>
                     <div style="margin-bottom: 16px;">
                         <div style="display: flex; height: 40px; border-radius: 8px; overflow: hidden;">
-                            <div style="width: ${(distribution.exceptional/total)*100}%; background: #10b981; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                            <div style="width: ${(distribution.exceptional/total)*100}%; background: #4F9262; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
                                 ${distribution.exceptional > 0 ? distribution.exceptional : ''}
                             </div>
                             <div style="width: ${(distribution.strong/total)*100}%; background: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
@@ -808,7 +836,7 @@
                     </div>
                     <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px;">
                         <div style="display: flex; align-items: center; gap: 6px;">
-                            <div style="width: 12px; height: 12px; background: #10b981; border-radius: 3px;"></div>
+                            <div style="width: 12px; height: 12px; background: #4F9262; border-radius: 3px;"></div>
                             <span>Exceptional (6.5+): ${distribution.exceptional} (${((distribution.exceptional/total)*100).toFixed(0)}%)</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 6px;">
@@ -835,7 +863,7 @@
                     <div style="overflow-x: auto;">
                         <table style="width: 100%; border-collapse: collapse;">
                             <thead>
-                                <tr style="background: #0f172a; border-bottom: 2px solid #334155;">
+                                <tr style="background: #0e313e; border-bottom: 2px solid #4D889D;">
                                     <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Rank</th>
                                     <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Trainer Name</th>
                                     <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Site</th>
@@ -846,12 +874,12 @@
                             </thead>
                             <tbody>
                                 ${trainers.sort((a, b) => b.stats.average_score - a.stats.average_score).map((t, i) => `
-                                    <tr style="border-bottom: 1px solid #1e293b; cursor: pointer; transition: background 0.2s;" 
+                                    <tr style="border-bottom: 1px solid #1a2730; cursor: pointer; transition: background 0.2s;" 
                                         onclick="selectTrainer('${t.trainer_id}')"
-                                        onmouseover="this.style.background='#0f172a'" 
+                                        onmouseover="this.style.background='#0e313e'" 
                                         onmouseout="this.style.background='transparent'">
                                         <td style="padding: 12px;">
-                                            <div style="width: 32px; height: 32px; border-radius: 50%; background: ${i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : '#334155'}; display: flex; align-items: center; justify-content: center; font-weight: bold; color: ${i < 3 ? '#0f172a' : '#e2e8f0'};">
+                                            <div style="width: 32px; height: 32px; border-radius: 50%; background: ${i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : '#4D889D'}; display: flex; align-items: center; justify-content: center; font-weight: bold; color: ${i < 3 ? '#0e313e' : '#e2e8f0'};">
                                                 ${i + 1}
                                             </div>
                                         </td>
@@ -863,15 +891,15 @@
                                             ${t.training_site}
                                         </td>
                                         <td style="padding: 12px; text-align: center;">
-                                            <span style="background: #334155; padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 14px;">
+                                            <span style="background: #4D889D; padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 14px;">
                                                 ${t.stats.observation_count}
                                             </span>
                                         </td>
                                         <td style="padding: 12px; text-align: center;">
                                             <span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: 600; ${
-                                                t.stats.trend === 'improving' ? 'background: #064e3b; color: #10b981;' : 
+                                                t.stats.trend === 'improving' ? 'background: #064e3b; color: #4F9262;' : 
                                                 t.stats.trend === 'declining' ? 'background: #7f1d1d; color: #ef4444;' : 
-                                                'background: #1e293b; color: #94a3b8;'
+                                                'background: #1a2730; color: #94a3b8;'
                                             }">
                                                 ${t.stats.trend === 'improving' ? '📈' : t.stats.trend === 'declining' ? '📉' : '➡️'}
                                                 <span style="text-transform: capitalize;">${t.stats.trend}</span>
@@ -892,7 +920,7 @@
                 <div class="section">
                     <h3 class="section-title">📍 District Rankings</h3>
                     ${districts.sort((a, b) => b.average - a.average).map((d, i) => `
-                        <div style="display: grid; grid-template-columns: 40px 1fr 80px 100px; gap: 12px; align-items: center; padding: 12px; background: #0f172a; border-radius: 8px; margin-bottom: 8px; cursor: pointer;" onclick="document.getElementById('district-filter').value='${d.name}'; selectDistrict();">
+                        <div style="display: grid; grid-template-columns: 40px 1fr 80px 100px; gap: 12px; align-items: center; padding: 12px; background: #0e313e; border-radius: 8px; margin-bottom: 8px; cursor: pointer;" onclick="document.getElementById('district-filter').value='${d.name}'; selectDistrict();">
                             <div style="font-weight: bold; color: ${i === 0 ? '#fbbf24' : '#94a3b8'}; font-size: 18px;">
                                 #${i + 1}
                             </div>
@@ -903,7 +931,7 @@
                             <div class="score-${getScoreColor(d.average)}" style="font-weight: bold; font-size: 18px;">
                                 ${d.average.toFixed(2)}
                             </div>
-                            <div style="font-size: 11px; color: ${d.average >= data.average ? '#10b981' : '#ef4444'};">
+                            <div style="font-size: 11px; color: ${d.average >= data.average ? '#4F9262' : '#ef4444'};">
                                 ${d.average >= data.average ? '↑' : '↓'} ${Math.abs(d.average - data.average).toFixed(2)} vs program
                             </div>
                         </div>
@@ -943,11 +971,11 @@
                                     <div class="comparison-vs">vs</div>
                                     <div class="comparison-compare-score">${programAvg.toFixed(2)}</div>
                                 </div>
-                                <div style="height: 8px; background: #0f172a; border-radius: 4px; overflow: hidden; margin: 12px 0;">
-                                    <div style="height: 100%; width: ${(d.average/7)*100}%; background: ${d.average >= programAvg ? '#10b981' : '#f59e0b'};"></div>
+                                <div style="height: 8px; background: #0e313e; border-radius: 4px; overflow: hidden; margin: 12px 0;">
+                                    <div style="height: 100%; width: ${(d.average/7)*100}%; background: ${d.average >= programAvg ? '#4F9262' : '#f59e0b'};"></div>
                                 </div>
                                 <div class="comparison-meta">
-                                    <span style="color: ${d.average >= programAvg ? '#10b981' : '#ef4444'};">
+                                    <span style="color: ${d.average >= programAvg ? '#4F9262' : '#ef4444'};">
                                         ${d.average >= programAvg ? '+' : ''}${(d.average - programAvg).toFixed(2)} vs program
                                     </span>
                                     <span>${d.trainers} trainers</span>
@@ -993,11 +1021,11 @@
                     <h3 class="section-title">📈 Trend Analysis</h3>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
                         <div style="background: #064e3b; padding: 20px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 32px; font-weight: bold; color: #10b981;">${improving}</div>
+                            <div style="font-size: 32px; font-weight: bold; color: #4F9262;">${improving}</div>
                             <div style="font-size: 14px; color: #94a3b8; margin-top: 8px;">Improving</div>
                             <div style="font-size: 12px; color: #64748b; margin-top: 4px;">${((improving/trainers.length)*100).toFixed(0)}% of trainers</div>
                         </div>
-                        <div style="background: #334155; padding: 20px; border-radius: 8px; text-align: center;">
+                        <div style="background: #4D889D; padding: 20px; border-radius: 8px; text-align: center;">
                             <div style="font-size: 32px; font-weight: bold; color: #94a3b8;">${stable}</div>
                             <div style="font-size: 14px; color: #94a3b8; margin-top: 8px;">Stable</div>
                             <div style="font-size: 12px; color: #64748b; margin-top: 4px;">${((stable/trainers.length)*100).toFixed(0)}% of trainers</div>
@@ -1047,12 +1075,12 @@
             const weakest = sortedComps.slice(-3);
             
             const urgency = needsAttention.length >= 5 ? 'immediate' : needsAttention.length >= 3 ? 'short-term' : 'monitoring';
-            const urgencyColor = urgency === 'immediate' ? '#ef4444' : urgency === 'short-term' ? '#f59e0b' : '#10b981';
+            const urgencyColor = urgency === 'immediate' ? '#ef4444' : urgency === 'short-term' ? '#f59e0b' : '#4F9262';
             
             return `
                 <div class="section">
                     <h3 class="section-title">📋 Executive Summary</h3>
-                    <div style="background: #0f172a; padding: 20px; border-radius: 8px; line-height: 1.8;">
+                    <div style="background: #0e313e; padding: 20px; border-radius: 8px; line-height: 1.8;">
                         <p style="color: #cbd5e1;">
                             The <strong>E!BA Bootcamp 2025 program</strong> comprises <strong>${trainers.length} trainers</strong> across 
                             <strong>${DEMO_DATA.program.districts} districts</strong>, with <strong>${DEMO_DATA.program.observations} total observations</strong> 
@@ -1174,7 +1202,7 @@
                         }
                     ].map(plan => {
                         const priorityColor = plan.priority === 'IMMEDIATE' ? '#ef4444' : 
-                                            plan.priority === 'SHORT-TERM' ? '#f59e0b' : '#10b981';
+                                            plan.priority === 'SHORT-TERM' ? '#f59e0b' : '#4F9262';
                         const priorityBg = plan.priority === 'IMMEDIATE' ? '#7f1d1d33' : 
                                          plan.priority === 'SHORT-TERM' ? '#78350f33' : '#064e3b33';
                         return `
@@ -1194,13 +1222,13 @@
                                             </span>
                                             <h4 style="color: #e2e8f0; font-size: 16px; margin: 0;">${plan.title}</h4>
                                         </div>
-                                        <div style="background: #0f172a; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                                            <div style="font-size: 11px; color: #f97316; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Action Steps:</div>
+                                        <div style="background: #0e313e; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                                            <div style="font-size: 11px; color: #F1A01B; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Action Steps:</div>
                                             <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; font-size: 14px; line-height: 1.8;">
                                                 ${plan.actions.map(a => `<li>${a}</li>`).join('')}
                                             </ul>
                                         </div>
-                                        <div style="display: flex; align-items: center; gap: 8px; color: #10b981; font-size: 13px;">
+                                        <div style="display: flex; align-items: center; gap: 8px; color: #4F9262; font-size: 13px;">
                                             <span>💚</span>
                                             <span style="font-weight: 500;">Success Metric:</span>
                                             <span>${plan.metric}</span>
@@ -1286,7 +1314,7 @@
                     <h3 class="section-title">📈 Performance Distribution</h3>
                     <div style="margin-bottom: 16px;">
                         <div style="display: flex; height: 40px; border-radius: 8px; overflow: hidden;">
-                            <div style="width: ${(distribution.exceptional/total)*100}%; background: #10b981; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                            <div style="width: ${(distribution.exceptional/total)*100}%; background: #4F9262; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
                                 ${distribution.exceptional > 0 ? distribution.exceptional : ''}
                             </div>
                             <div style="width: ${(distribution.strong/total)*100}%; background: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
@@ -1305,8 +1333,8 @@
                 <div class="section">
                     <h3 class="section-title">🏆 Top Performers in ${district.name}</h3>
                     ${districtTrainers.sort((a, b) => b.stats.average_score - a.stats.average_score).slice(0, 5).map((t, i) => `
-                        <div style="display: grid; grid-template-columns: 40px 1fr 80px; gap: 12px; align-items: center; padding: 12px; background: #0f172a; border-radius: 8px; margin-bottom: 8px; cursor: pointer;" onclick="selectTrainer('${t.trainer_id}')">
-                            <div style="width: 32px; height: 32px; border-radius: 50%; background: ${i === 0 ? '#fbbf24' : '#334155'}; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                        <div style="display: grid; grid-template-columns: 40px 1fr 80px; gap: 12px; align-items: center; padding: 12px; background: #0e313e; border-radius: 8px; margin-bottom: 8px; cursor: pointer;" onclick="selectTrainer('${t.trainer_id}')">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: ${i === 0 ? '#fbbf24' : '#4D889D'}; display: flex; align-items: center; justify-content: center; font-weight: bold;">
                                 ${i + 1}
                             </div>
                             <div>
@@ -1326,7 +1354,7 @@
                         const siteTrainers = districtTrainers.filter(t => t.training_site === site);
                         const siteAvg = siteTrainers.reduce((sum, t) => sum + t.stats.average_score, 0) / siteTrainers.length;
                         return `
-                            <div style="display: grid; grid-template-columns: 1fr 80px 100px; gap: 12px; align-items: center; padding: 12px; background: #0f172a; border-radius: 8px; margin-bottom: 8px; cursor: pointer;" onclick="document.getElementById('site-filter').value='${site}'; selectSite();">
+                            <div style="display: grid; grid-template-columns: 1fr 80px 100px; gap: 12px; align-items: center; padding: 12px; background: #0e313e; border-radius: 8px; margin-bottom: 8px; cursor: pointer;" onclick="document.getElementById('site-filter').value='${site}'; selectSite();">
                                 <div>
                                     <div style="font-weight: 600;">${site}</div>
                                     <div style="font-size: 11px; color: #94a3b8;">${siteTrainers.length} trainers</div>
@@ -1334,7 +1362,7 @@
                                 <div class="score-${getScoreColor(siteAvg)}" style="font-weight: bold; font-size: 18px;">
                                     ${siteAvg.toFixed(2)}
                                 </div>
-                                <div style="font-size: 11px; color: ${siteAvg >= district.average ? '#10b981' : '#ef4444'};">
+                                <div style="font-size: 11px; color: ${siteAvg >= district.average ? '#4F9262' : '#ef4444'};">
                                     ${siteAvg >= district.average ? '↑' : '↓'} vs district
                                 </div>
                             </div>
@@ -1358,11 +1386,11 @@
                             <div class="comparison-vs">vs</div>
                             <div class="comparison-compare-score">${programAvg.toFixed(2)}</div>
                         </div>
-                        <div style="height: 8px; background: #0f172a; border-radius: 4px; overflow: hidden; margin: 12px 0;">
-                            <div style="height: 100%; width: ${(district.average/7)*100}%; background: ${district.average >= programAvg ? '#10b981' : '#f59e0b'};"></div>
+                        <div style="height: 8px; background: #0e313e; border-radius: 4px; overflow: hidden; margin: 12px 0;">
+                            <div style="height: 100%; width: ${(district.average/7)*100}%; background: ${district.average >= programAvg ? '#4F9262' : '#f59e0b'};"></div>
                         </div>
                         <div class="comparison-meta">
-                            <span style="color: ${district.average >= programAvg ? '#10b981' : '#ef4444'};">
+                            <span style="color: ${district.average >= programAvg ? '#4F9262' : '#ef4444'};">
                                 ${district.average >= programAvg ? '+' : ''}${(district.average - programAvg).toFixed(2)} vs program average
                             </span>
                             <span>${district.trainers} trainers</span>
@@ -1377,7 +1405,7 @@
                         const siteAvg = siteTrainers.reduce((sum, t) => sum + t.stats.average_score, 0) / siteTrainers.length;
                         return { site, avg: siteAvg, trainers: siteTrainers.length };
                     }).sort((a, b) => b.avg - a.avg).map((s, i) => `
-                        <div style="display: grid; grid-template-columns: 40px 1fr 80px 120px; gap: 12px; align-items: center; padding: 12px; background: #0f172a; border-radius: 8px; margin-bottom: 8px;">
+                        <div style="display: grid; grid-template-columns: 40px 1fr 80px 120px; gap: 12px; align-items: center; padding: 12px; background: #0e313e; border-radius: 8px; margin-bottom: 8px;">
                             <div style="font-weight: bold; color: ${i === 0 ? '#fbbf24' : '#94a3b8'}; font-size: 18px;">
                                 #${i + 1}
                             </div>
@@ -1388,7 +1416,7 @@
                             <div class="score-${getScoreColor(s.avg)}" style="font-weight: bold; font-size: 18px;">
                                 ${s.avg.toFixed(2)}
                             </div>
-                            <div style="font-size: 11px; color: ${s.avg >= district.average ? '#10b981' : '#ef4444'};">
+                            <div style="font-size: 11px; color: ${s.avg >= district.average ? '#4F9262' : '#ef4444'};">
                                 ${s.avg >= district.average ? '↑' : '↓'} ${Math.abs(s.avg - district.average).toFixed(2)} vs district
                             </div>
                         </div>
@@ -1404,12 +1432,12 @@
             return `
                 <div class="section">
                     <h3 class="section-title">📋 District Summary</h3>
-                    <div style="background: #0f172a; padding: 20px; border-radius: 8px; line-height: 1.8;">
+                    <div style="background: #0e313e; padding: 20px; border-radius: 8px; line-height: 1.8;">
                         <p style="color: #cbd5e1;">
                             <strong>${district.name} District</strong> has <strong>${district.trainers} trainers</strong> with 
                             <strong>${district.observations} observations</strong> recorded. The district average is 
                             <strong class="score-${getScoreColor(district.average)}">${district.average.toFixed(2)}/5.0</strong>, which is 
-                            <strong style="color: ${district.average >= programAvg ? '#10b981' : '#ef4444'};">
+                            <strong style="color: ${district.average >= programAvg ? '#4F9262' : '#ef4444'};">
                                 ${district.average >= programAvg ? `${(district.average - programAvg).toFixed(2)} points above` : `${(programAvg - district.average).toFixed(2)} points below`}
                             </strong> the program average of ${programAvg.toFixed(2)}.
                         </p>
@@ -1595,13 +1623,13 @@
                     <h3 class="section-title">📈 Trainer Distribution at Site</h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
                         ${[
-                            { label: 'Exceptional', count: distribution.exceptional, color: '#10b981' },
+                            { label: 'Exceptional', count: distribution.exceptional, color: '#4F9262' },
                             { label: 'Strong', count: distribution.strong, color: '#22c55e' },
                             { label: 'Adequate', count: distribution.adequate, color: '#eab308' },
                             { label: 'Developing', count: distribution.developing, color: '#f59e0b' },
                             { label: 'Needs Support', count: distribution.needsSupport, color: '#ef4444' }
                         ].map(d => `
-                            <div style="background: #0f172a; padding: 16px; border-radius: 8px; text-align: center; border-left: 4px solid ${d.color};">
+                            <div style="background: #0e313e; padding: 16px; border-radius: 8px; text-align: center; border-left: 4px solid ${d.color};">
                                 <div style="font-size: 28px; font-weight: bold; color: ${d.color};">${d.count}</div>
                                 <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">${d.label}</div>
                             </div>
@@ -1612,8 +1640,8 @@
                 <div class="section">
                     <h3 class="section-title">👥 Trainers at ${site.name}</h3>
                     ${siteTrainers.sort((a, b) => b.stats.average_score - a.stats.average_score).map((t, i) => `
-                        <div style="display: grid; grid-template-columns: 40px 1fr 80px 150px; gap: 12px; align-items: center; padding: 12px; background: #0f172a; border-radius: 8px; border-left: 4px solid ${i === 0 ? '#fbbf24' : '#334155'}; margin-bottom: 8px; cursor: pointer;" onclick="selectTrainer('${t.trainer_id}')">
-                            <div style="width: 32px; height: 32px; border-radius: 50%; background: ${i === 0 ? '#fbbf24' : '#334155'}; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white;">
+                        <div style="display: grid; grid-template-columns: 40px 1fr 80px 150px; gap: 12px; align-items: center; padding: 12px; background: #0e313e; border-radius: 8px; border-left: 4px solid ${i === 0 ? '#fbbf24' : '#4D889D'}; margin-bottom: 8px; cursor: pointer;" onclick="selectTrainer('${t.trainer_id}')">
+                            <div style="width: 32px; height: 32px; border-radius: 50%; background: ${i === 0 ? '#fbbf24' : '#4D889D'}; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white;">
                                 ${i + 1}
                             </div>
                             <div>
@@ -1624,7 +1652,7 @@
                                 ${t.stats.average_score.toFixed(2)}
                             </div>
                             <div style="font-size: 11px;">
-                                <span style="color: ${t.stats.trend === 'improving' ? '#10b981' : t.stats.trend === 'declining' ? '#ef4444' : '#94a3b8'};">
+                                <span style="color: ${t.stats.trend === 'improving' ? '#4F9262' : t.stats.trend === 'declining' ? '#ef4444' : '#94a3b8'};">
                                     ${t.stats.trend === 'improving' ? '📈 Improving' : t.stats.trend === 'declining' ? '📉 Declining' : '➡️ Stable'}
                                 </span>
                             </div>
@@ -1636,11 +1664,11 @@
                     <h3 class="section-title">📊 Performance Trends</h3>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
                         ${[
-                            { label: 'Improving', count: siteTrainers.filter(t => t.stats.trend === 'improving').length, color: '#10b981', icon: '📈' },
+                            { label: 'Improving', count: siteTrainers.filter(t => t.stats.trend === 'improving').length, color: '#4F9262', icon: '📈' },
                             { label: 'Stable', count: siteTrainers.filter(t => t.stats.trend === 'stable').length, color: '#94a3b8', icon: '➡️' },
                             { label: 'Declining', count: siteTrainers.filter(t => t.stats.trend === 'declining').length, color: '#ef4444', icon: '📉' }
                         ].map(trend => `
-                            <div style="background: #0f172a; padding: 20px; border-radius: 8px; text-align: center;">
+                            <div style="background: #0e313e; padding: 20px; border-radius: 8px; text-align: center;">
                                 <div style="font-size: 32px; margin-bottom: 8px;">${trend.icon}</div>
                                 <div style="font-size: 28px; font-weight: bold; color: ${trend.color};">${trend.count}</div>
                                 <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">${trend.label}</div>
@@ -1671,7 +1699,7 @@
                                 <div class="comparison-compare-score">${districtAvg.toFixed(2)}</div>
                             </div>
                             <div class="comparison-meta">
-                                <span style="color: ${site.average >= districtAvg ? '#10b981' : '#ef4444'};">
+                                <span style="color: ${site.average >= districtAvg ? '#4F9262' : '#ef4444'};">
                                     ${site.average >= districtAvg ? '+' : ''}${(site.average - districtAvg).toFixed(2)} vs district
                                 </span>
                             </div>
@@ -1688,7 +1716,7 @@
                                 <div class="comparison-compare-score">${programAvg.toFixed(2)}</div>
                             </div>
                             <div class="comparison-meta">
-                                <span style="color: ${site.average >= programAvg ? '#10b981' : '#ef4444'};">
+                                <span style="color: ${site.average >= programAvg ? '#4F9262' : '#ef4444'};">
                                     ${site.average >= programAvg ? '+' : ''}${(site.average - programAvg).toFixed(2)} vs program
                                 </span>
                             </div>
@@ -1699,7 +1727,7 @@
                 <div class="section">
                     <h3 class="section-title">👥 Trainer Rankings at Site</h3>
                     ${siteTrainers.sort((a, b) => b.stats.average_score - a.stats.average_score).map((t, i) => `
-                        <div style="display: grid; grid-template-columns: 50px 1fr 80px 120px; gap: 12px; align-items: center; padding: 12px; background: ${i === 0 ? '#064e3b20' : '#0f172a'}; border-radius: 8px; border-left: 4px solid ${i === 0 ? '#10b981' : '#334155'}; margin-bottom: 8px; cursor: pointer;" onclick="selectTrainer('${t.trainer_id}')">
+                        <div style="display: grid; grid-template-columns: 50px 1fr 80px 120px; gap: 12px; align-items: center; padding: 12px; background: ${i === 0 ? '#064e3b20' : '#0e313e'}; border-radius: 8px; border-left: 4px solid ${i === 0 ? '#4F9262' : '#4D889D'}; margin-bottom: 8px; cursor: pointer;" onclick="selectTrainer('${t.trainer_id}')">
                             <div style="text-align: center;">
                                 <div style="font-size: 20px; font-weight: bold; color: ${i === 0 ? '#fbbf24' : '#94a3b8'};">
                                     #${i + 1}
@@ -1712,7 +1740,7 @@
                             <div class="score-${getScoreColor(t.stats.average_score)}" style="font-weight: bold; font-size: 20px;">
                                 ${t.stats.average_score.toFixed(2)}
                             </div>
-                            <div style="font-size: 11px; color: ${t.stats.average_score >= site.average ? '#10b981' : '#ef4444'};">
+                            <div style="font-size: 11px; color: ${t.stats.average_score >= site.average ? '#4F9262' : '#ef4444'};">
                                 ${t.stats.average_score >= site.average ? '↑' : '↓'} ${Math.abs(t.stats.average_score - site.average).toFixed(2)} vs site avg
                             </div>
                         </div>
@@ -1766,12 +1794,12 @@
             return `
                 <div class="section">
                     <h3 class="section-title">📋 Site Summary</h3>
-                    <div style="background: #0f172a; padding: 20px; border-radius: 8px; line-height: 1.8;">
+                    <div style="background: #0e313e; padding: 20px; border-radius: 8px; line-height: 1.8;">
                         <p style="color: #cbd5e1;">
                             <strong>${site.name}</strong> in <strong>${site.district} District</strong> has <strong>${site.trainers} trainers</strong> 
                             with <strong>${site.observations} total observations</strong>. The site average is 
                             <strong class="score-${getScoreColor(site.average)}">${site.average.toFixed(2)}/5.0</strong>, which is 
-                            <strong style="color: ${site.average >= districtAvg ? '#10b981' : '#ef4444'};">
+                            <strong style="color: ${site.average >= districtAvg ? '#4F9262' : '#ef4444'};">
                                 ${site.average >= districtAvg ? (site.average - districtAvg).toFixed(2) + ' points above' : (districtAvg - site.average).toFixed(2) + ' points below'}
                             </strong> the district average.
                         </p>
@@ -1862,7 +1890,7 @@
                         }
                     ].map(plan => {
                         const priorityColor = plan.priority === 'IMMEDIATE' ? '#ef4444' : 
-                                            plan.priority === 'LEVERAGE' ? '#10b981' :
+                                            plan.priority === 'LEVERAGE' ? '#4F9262' :
                                             plan.priority === 'BUILD' ? '#3b82f6' : '#94a3b8';
                         return `
                             <div class="action-step">
@@ -2026,7 +2054,7 @@
                             <div class="stats-grid-label">Performance Level</div>
                         </div>
                         <div class="stats-grid-item">
-                            <div class="stats-grid-value" style="color: ${trainer.stats.trend === 'improving' ? '#10b981' : trainer.stats.trend === 'declining' ? '#ef4444' : '#94a3b8'};">
+                            <div class="stats-grid-value" style="color: ${trainer.stats.trend === 'improving' ? '#4F9262' : trainer.stats.trend === 'declining' ? '#ef4444' : '#94a3b8'};">
                                 ${trainer.stats.trend === 'improving' ? '📈' : trainer.stats.trend === 'declining' ? '📉' : '➡️'}
                             </div>
                             <div class="stats-grid-label">${trainer.stats.trend.charAt(0).toUpperCase() + trainer.stats.trend.slice(1)}</div>
@@ -2039,7 +2067,7 @@
                     <div style="overflow-x: auto;">
                         <table style="width: 100%; border-collapse: collapse;">
                             <thead>
-                                <tr style="background: #0f172a; border-bottom: 2px solid #334155;">
+                                <tr style="background: #0e313e; border-bottom: 2px solid #4D889D;">
                                     <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">#</th>
                                     <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Date</th>
                                     <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Week</th>
@@ -2049,11 +2077,11 @@
                             </thead>
                             <tbody>
                                 ${trainer.observations.map((obs, i) => `
-                                    <tr style="border-bottom: 1px solid #1e293b; transition: background 0.2s;" onmouseover="this.style.background='#0f172a'" onmouseout="this.style.background='transparent'">
+                                    <tr style="border-bottom: 1px solid #1a2730; transition: background 0.2s;" onmouseover="this.style.background='#0e313e'" onmouseout="this.style.background='transparent'">
                                         <td style="padding: 12px; color: #64748b; font-weight: 600;">${i + 1}</td>
                                         <td style="padding: 12px; color: #cbd5e1;">${obs.date}</td>
                                         <td style="padding: 12px;">
-                                            <span style="background: #334155; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                                            <span style="background: #4D889D; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;">
                                                 ${obs.week}
                                             </span>
                                         </td>
@@ -2086,15 +2114,15 @@
                 <div class="section">
                     <h3 class="section-title">📍 Context</h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                        <div style="background: #0f172a; padding: 16px; border-radius: 8px;">
+                        <div style="background: #0e313e; padding: 16px; border-radius: 8px;">
                             <div style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">DISTRICT</div>
                             <div style="font-weight: 600;">${trainer.district_name}</div>
                         </div>
-                        <div style="background: #0f172a; padding: 16px; border-radius: 8px;">
+                        <div style="background: #0e313e; padding: 16px; border-radius: 8px;">
                             <div style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">TRAINING SITE</div>
                             <div style="font-weight: 600; font-size: 13px;">${trainer.training_site}</div>
                         </div>
-                        <div style="background: #0f172a; padding: 16px; border-radius: 8px;">
+                        <div style="background: #0e313e; padding: 16px; border-radius: 8px;">
                             <div style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">GENDER</div>
                             <div style="font-weight: 600;">${trainer.trainer_gender}</div>
                         </div>
@@ -2130,7 +2158,7 @@
                                 <div class="comparison-compare-score">${programAvg.toFixed(2)}</div>
                             </div>
                             <div class="comparison-meta">
-                                <span style="color: ${trainer.stats.average_score >= programAvg ? '#10b981' : '#ef4444'};">
+                                <span style="color: ${trainer.stats.average_score >= programAvg ? '#4F9262' : '#ef4444'};">
                                     ${trainer.stats.average_score >= programAvg ? '+' : ''}${(trainer.stats.average_score - programAvg).toFixed(2)}
                                 </span>
                             </div>
@@ -2147,7 +2175,7 @@
                                 <div class="comparison-compare-score">${districtAvg.toFixed(2)}</div>
                             </div>
                             <div class="comparison-meta">
-                                <span style="color: ${trainer.stats.average_score >= districtAvg ? '#10b981' : '#ef4444'};">
+                                <span style="color: ${trainer.stats.average_score >= districtAvg ? '#4F9262' : '#ef4444'};">
                                     ${trainer.stats.average_score >= districtAvg ? '+' : ''}${(trainer.stats.average_score - districtAvg).toFixed(2)}
                                 </span>
                             </div>
@@ -2164,7 +2192,7 @@
                                 <div class="comparison-compare-score">${siteAvg.toFixed(2)}</div>
                             </div>
                             <div class="comparison-meta">
-                                <span style="color: ${trainer.stats.average_score >= siteAvg ? '#10b981' : '#ef4444'};">
+                                <span style="color: ${trainer.stats.average_score >= siteAvg ? '#4F9262' : '#ef4444'};">
                                     ${trainer.stats.average_score >= siteAvg ? '+' : ''}${(trainer.stats.average_score - siteAvg).toFixed(2)}
                                 </span>
                             </div>
@@ -2181,7 +2209,7 @@
                                 <div class="comparison-compare-score">${genderAvg.toFixed(2)}</div>
                             </div>
                             <div class="comparison-meta">
-                                <span style="color: ${trainer.stats.average_score >= genderAvg ? '#10b981' : '#ef4444'};">
+                                <span style="color: ${trainer.stats.average_score >= genderAvg ? '#4F9262' : '#ef4444'};">
                                     ${trainer.stats.average_score >= genderAvg ? '+' : ''}${(trainer.stats.average_score - genderAvg).toFixed(2)}
                                 </span>
                                 <span>${genderPeers.length} peers</span>
@@ -2201,13 +2229,13 @@
                             <div style="margin-bottom: 16px;">
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                                     <span style="font-size: 13px; font-weight: 500;">${comp}</span>
-                                    <span style="font-size: 13px; color: ${diff >= 0 ? '#10b981' : '#ef4444'};">
+                                    <span style="font-size: 13px; color: ${diff >= 0 ? '#4F9262' : '#ef4444'};">
                                         ${diff >= 0 ? '+' : ''}${diff.toFixed(2)} vs program
                                     </span>
                                 </div>
                                 <div style="display: flex; gap: 8px; align-items: center;">
-                                    <div style="flex: 1; height: 8px; background: #0f172a; border-radius: 4px; overflow: hidden;">
-                                        <div style="height: 100%; width: ${(score/5)*100}%; background: ${diff >= 0 ? '#10b981' : '#f59e0b'};"></div>
+                                    <div style="flex: 1; height: 8px; background: #0e313e; border-radius: 4px; overflow: hidden;">
+                                        <div style="height: 100%; width: ${(score/5)*100}%; background: ${diff >= 0 ? '#4F9262' : '#f59e0b'};"></div>
                                     </div>
                                     <span style="font-size: 13px; font-weight: bold; min-width: 35px; text-align: right;" class="score-${getScoreColor(score)}">
                                         ${score.toFixed(2)}
@@ -2227,22 +2255,22 @@
                         
                         return `
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-                                <div style="background: #0f172a; padding: 20px; border-radius: 8px; text-align: center;">
-                                    <div style="font-size: 32px; font-weight: bold; color: ${rank <= 3 ? '#fbbf24' : '#f97316'};">
+                                <div style="background: #0e313e; padding: 20px; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 32px; font-weight: bold; color: ${rank <= 3 ? '#fbbf24' : '#F1A01B'};">
                                         #${rank}
                                     </div>
                                     <div style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Program Rank</div>
                                     <div style="font-size: 11px; color: #64748b; margin-top: 4px;">out of ${DEMO_DATA.trainers.length}</div>
                                 </div>
-                                <div style="background: #0f172a; padding: 20px; border-radius: 8px; text-align: center;">
-                                    <div style="font-size: 32px; font-weight: bold; color: #f97316;">
+                                <div style="background: #0e313e; padding: 20px; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 32px; font-weight: bold; color: #F1A01B;">
                                         ${percentile}%
                                     </div>
                                     <div style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Percentile</div>
                                     <div style="font-size: 11px; color: #64748b; margin-top: 4px;">top ${percentile}%</div>
                                 </div>
-                                <div style="background: #0f172a; padding: 20px; border-radius: 8px; text-align: center;">
-                                    <div style="font-size: 24px; font-weight: bold; color: ${trainer.stats.trend === 'improving' ? '#10b981' : trainer.stats.trend === 'declining' ? '#ef4444' : '#94a3b8'};">
+                                <div style="background: #0e313e; padding: 20px; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold; color: ${trainer.stats.trend === 'improving' ? '#4F9262' : trainer.stats.trend === 'declining' ? '#ef4444' : '#94a3b8'};">
                                         ${trainer.stats.trend === 'improving' ? '📈' : trainer.stats.trend === 'declining' ? '📉' : '➡️'}
                                     </div>
                                     <div style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Trend</div>
@@ -2261,7 +2289,7 @@
             }
             
             const urgencyColor = analysis.urgency === 'immediate' ? '#ef4444' : 
-                                 analysis.urgency === 'short-term' ? '#f59e0b' : '#10b981';
+                                 analysis.urgency === 'short-term' ? '#f59e0b' : '#4F9262';
             
             // Get site and district for context
             const site = DEMO_DATA.sites.find(s => s.name === trainer.training_site);
@@ -2297,7 +2325,7 @@
             const weaknessComments = hasComments ? trainer.all_comments.filter(c => c.type === 'weakness').slice(0, 3) : [];
             
             return `
-                <div style="margin-bottom: 20px; display: flex; gap: 12px; align-items: center; padding: 16px; background: #1e293b; border-radius: 8px;">
+                <div style="margin-bottom: 20px; display: flex; gap: 12px; align-items: center; padding: 16px; background: #1a2730; border-radius: 8px;">
                     <div style="flex: 1;">
                         <div style="color: #94a3b8; font-size: 13px; margin-bottom: 4px;">Analysis Mode</div>
                         <div style="color: #e2e8f0; font-weight: 600;">Rule-Based Quick Insights</div>
@@ -2316,7 +2344,7 @@
                 
                 <div class="section">
                     <h3 class="section-title">📋 Executive Summary</h3>
-                    <div style="background: #0f172a; padding: 20px; border-radius: 8px; line-height: 1.8; color: #cbd5e1;">
+                    <div style="background: #0e313e; padding: 20px; border-radius: 8px; line-height: 1.8; color: #cbd5e1;">
                         <strong>${trainer.trainer_name}</strong> is a ${trainer.trainer_gender} trainer at <strong>${trainer.training_site}</strong> in <strong>${trainer.district_name}</strong>. 
                         Based on <strong>${trainer.stats.observation_count} observations</strong>, their overall average is <strong class="score-${getScoreColor(trainer.stats.average_score)}">${trainer.stats.average_score.toFixed(2)}/5.0 (${getScoreLabel(trainer.stats.average_score)})</strong>. 
                         They rank <strong>#${districtRank} of ${districtTrainers.length} trainers</strong> in ${trainer.district_name}.
@@ -2350,8 +2378,8 @@
                 <div class="section">
                     <h3 class="section-title">💪 Key Strengths</h3>
                     ${topComps.map(([name, score]) => `
-                        <div style="background: #064e3b; border-left: 4px solid #10b981; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-                            <div style="font-weight: 600; color: #10b981; margin-bottom: 8px;">${name} (${score.toFixed(2)}/5.0)</div>
+                        <div style="background: #064e3b; border-left: 4px solid #4F9262; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+                            <div style="font-weight: 600; color: #4F9262; margin-bottom: 8px;">${name} (${score.toFixed(2)}/5.0)</div>
                             <div style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
                                 ${name} is a key strength at ${score.toFixed(2)}/5.0 - ${score >= 4.0 ? 'excellent' : 'solid'} performance. 
                                 Continue reinforcing these skills. 
@@ -2361,8 +2389,8 @@
                     `).join('')}
                     
                     ${strengthComments.length > 0 ? `
-                        <div style="background: #0f172a; padding: 16px; border-radius: 8px; margin-top: 12px;">
-                            <div style="font-weight: 600; color: #10b981; margin-bottom: 12px;">Observer Noted: Positive Feedback</div>
+                        <div style="background: #0e313e; padding: 16px; border-radius: 8px; margin-top: 12px;">
+                            <div style="font-weight: 600; color: #4F9262; margin-bottom: 12px;">Observer Noted: Positive Feedback</div>
                             ${strengthComments.map(comment => `
                                 <div style="margin-bottom: 12px;">
                                     <div style="color: #cbd5e1; font-style: italic; line-height: 1.6;">
@@ -2467,10 +2495,10 @@
                         
                         const priorityColor = priority === 'IMMEDIATE' ? '#ef4444' :
                                             priority === 'SHORT-TERM' ? '#f59e0b' :
-                                            priority === 'LEVERAGE STRENGTH' ? '#10b981' : '#3b82f6';
+                                            priority === 'LEVERAGE STRENGTH' ? '#4F9262' : '#3b82f6';
                         
                         return `
-                            <div style="background: #0f172a; padding: 20px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid ${priorityColor};">
+                            <div style="background: #0e313e; padding: 20px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid ${priorityColor};">
                                 <div style="display: flex; align-items: start; gap: 16px;">
                                     <div style="background: ${priorityColor}; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">
                                         ${i + 1}
@@ -2490,7 +2518,7 @@
                                         ${current ? `
                                             <div style="color: #94a3b8; font-size: 13px; margin-bottom: 12px;">
                                                 Current: <strong style="color: ${getScoreColor(parseFloat(current)) === 'needs-support' || getScoreColor(parseFloat(current)) === 'developing' ? '#ef4444' : '#fbbf24'}">${current}/5.0</strong> 
-                                                → Target: <strong style="color: #10b981">${target}/5.0</strong>
+                                                → Target: <strong style="color: #4F9262">${target}/5.0</strong>
                                             </div>
                                         ` : ''}
                                         
@@ -2502,7 +2530,7 @@
                                               ''}
                                         </div>
                                         
-                                        <div style="background: #1e293b; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
+                                        <div style="background: #1a2730; padding: 12px; border-radius: 6px; margin-bottom: 12px;">
                                             <div style="color: #94a3b8; font-size: 12px; font-weight: 600; margin-bottom: 8px;">ACTION STEPS:</div>
                                             <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; font-size: 13px; line-height: 1.8;">
                                                 ${isWeakest ? `
@@ -2538,7 +2566,7 @@
                                             </div>
                                         ` : ''}
                                         
-                                        <div style="color: #10b981; font-size: 13px; font-weight: 600;">
+                                        <div style="color: #4F9262; font-size: 13px; font-weight: 600;">
                                             🎯 Success Metric: ${
                                                 isWeakest || isSecondary ? `Achieve ${target}/5.0 in ${title}` :
                                                 isStrength ? 'Maintain excellence while transferring skills to peers' :
@@ -2555,7 +2583,7 @@
                 
                 <div class="section">
                     <h3 class="section-title">✅ Observer Action Items</h3>
-                    <div style="background: #0f172a; padding: 20px; border-radius: 8px;">
+                    <div style="background: #0e313e; padding: 20px; border-radius: 8px;">
                         <ul style="margin: 0; padding-left: 20px; color: #cbd5e1; line-height: 2; font-size: 14px;">
                             <li>Schedule 1:1 feedback session with ${trainer.trainer_name} within the next week</li>
                             <li>Focus observation on ${bottomComps[0] ? bottomComps[0][0] : 'development areas'} in next visit</li>
@@ -2630,31 +2658,31 @@ Please provide a comprehensive coaching analysis with:
 
 Be specific, empathetic, and action-oriented. Focus on what the observer should DO in their next coaching session.`;
 
-                // Call Claude API
-                const response = await fetch("https://api.anthropic.com/v1/messages", {
-                    method: "POST",
+                // Call Apps Script backend with Claude API integration
+                console.log('Calling Claude API via Apps Script...');
+                console.log('Prompt length:', prompt.length);
+                
+                const response = await fetch(APPS_SCRIPT_URL + '?action=claude_analysis', {
+                    method: 'POST',
                     headers: {
-                        "Content-Type": "application/json",
+                        'Content-Type': 'text/plain',
                     },
-                    body: JSON.stringify({
-                        model: "claude-sonnet-4-20250514",
-                        max_tokens: 4000,
-                        messages: [
-                            { role: "user", content: prompt }
-                        ],
-                    })
+                    body: prompt
                 });
 
+                console.log('Response status:', response.status);
                 const data = await response.json();
+                console.log('Response data:', data);
                 
                 if (data.error) {
-                    throw new Error(data.error.message || 'Claude API error');
+                    throw new Error(data.error);
                 }
                 
-                const claudeResponse = data.content
-                    .filter(item => item.type === 'text')
-                    .map(item => item.text)
-                    .join('\n');
+                if (!data.success || !data.analysis) {
+                    throw new Error('Invalid response from server. Response: ' + JSON.stringify(data));
+                }
+                
+                const claudeResponse = data.analysis;
 
                 // Display Claude's insights
                 container.innerHTML = `
@@ -2709,7 +2737,7 @@ ${claudeResponse}
         }
         
         function getScoreGradient(score) {
-            if (score >= 4.5) return '#10b981, #22c55e';
+            if (score >= 4.5) return '#4F9262, #22c55e';
             if (score >= 4.0) return '#22c55e, #84cc16';
             if (score >= 3.5) return '#eab308, #fbbf24';
             if (score >= 3.0) return '#f59e0b, #fb923c';
