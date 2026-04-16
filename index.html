@@ -117,24 +117,24 @@
         .competency-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
         .competency-score { text-align: right; font-weight: bold; }
         
-        /* Colors */
-        .score-exceptional { color: #4F9262; }
-        .score-strong { color: #22c55e; }
-        .score-adequate { color: #eab308; }
-        .score-developing { color: #f59e0b; }
-        .score-needs-support { color: #ef4444; }
+        /* Colors - Updated to match E!BA rubric */
+        .score-critical { color: #A03434; }
+        .score-needs-improvement { color: #ef4444; }
+        .score-basic { color: #f59e0b; }
+        .score-competent { color: #eab308; }
+        .score-model { color: #4F9262; }
         
-        .fill-exceptional { background: linear-gradient(90deg, #4F9262, #22c55e); }
-        .fill-strong { background: linear-gradient(90deg, #22c55e, #84cc16); }
-        .fill-adequate { background: linear-gradient(90deg, #eab308, #fbbf24); }
-        .fill-developing { background: linear-gradient(90deg, #f59e0b, #fb923c); }
-        .fill-needs-support { background: linear-gradient(90deg, #ef4444, #f87171); }
+        .fill-critical { background: linear-gradient(90deg, #A03434, #dc2626); }
+        .fill-needs-improvement { background: linear-gradient(90deg, #ef4444, #f87171); }
+        .fill-basic { background: linear-gradient(90deg, #f59e0b, #fb923c); }
+        .fill-competent { background: linear-gradient(90deg, #eab308, #fbbf24); }
+        .fill-model { background: linear-gradient(90deg, #4F9262, #22c55e); }
         
-        .border-exceptional { border-left-color: #4F9262; }
-        .border-strong { border-left-color: #22c55e; }
-        .border-adequate { border-left-color: #eab308; }
-        .border-developing { border-left-color: #f59e0b; }
-        .border-needs-support { border-left-color: #ef4444; }
+        .border-critical { border-left-color: #A03434; }
+        .border-needs-improvement { border-left-color: #ef4444; }
+        .border-basic { border-left-color: #f59e0b; }
+        .border-competent { border-left-color: #eab308; }
+        .border-model { border-left-color: #4F9262; }
         
         /* Loading */
         .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px; color: #94a3b8; }
@@ -143,11 +143,91 @@
         .loading-text { font-size: 14px; }
         
         /* Responsive */
-        @media (max-width: 768px) {
-            .main-container { flex-direction: column; height: auto; }
-            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #4D889D; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: repeat(3, 1fr); }
+            .comparison-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 968px) {
+            .header { flex-direction: column; align-items: flex-start; }
+            .header-stats { width: 100%; justify-content: space-between; }
+            .stat-card { flex: 1; min-width: 80px; }
+            
+            .main-container { flex-direction: column; height: auto; min-height: calc(100vh - 200px); }
+            .sidebar { 
+                width: 100%; 
+                border-right: none; 
+                border-bottom: 2px solid #0F6A8C; 
+                max-height: 400px;
+                overflow-y: auto;
+            }
+            .main-panel { padding: 16px; }
+            
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
             .comparison-grid { grid-template-columns: 1fr; }
+        }
+        
+        @media (max-width: 768px) {
+            body { font-size: 14px; }
+            
+            .header h1 { font-size: 20px; }
+            .header-subtitle { font-size: 12px; }
+            .stat-card { padding: 10px 12px; min-width: 70px; }
+            .stat-value { font-size: 20px; }
+            .stat-label { font-size: 11px; }
+            
+            /* Filters on mobile - stack vertically */
+            .filter-bar { flex-direction: column; align-items: stretch !important; }
+            .filter-bar > div:first-child { width: 100%; margin-bottom: 12px; }
+            .filter-bar > div:last-child { 
+                flex-direction: column; 
+                align-items: stretch !important;
+                gap: 8px !important;
+            }
+            .filter-bar select { width: 100% !important; min-width: auto !important; }
+            .filter-bar button { width: 100%; }
+            
+            .breadcrumb { flex-wrap: wrap; font-size: 12px; }
+            .breadcrumb span { padding: 4px 8px; font-size: 12px; }
+            
+            .sidebar { max-height: 300px; }
+            .trainer-card { padding: 10px; }
+            .trainer-card-name { font-size: 13px; }
+            .trainer-card-meta { font-size: 10px; }
+            .trainer-card-score { font-size: 14px; }
+            
+            .view-header { flex-direction: column; text-align: center; }
+            .view-title { font-size: 20px; }
+            .view-subtitle { font-size: 12px; }
+            .score-circle { width: 80px; height: 80px; margin-top: 12px; }
+            .score-circle-value { font-size: 24px; }
+            
+            .tabs { overflow-x: auto; flex-wrap: nowrap; }
+            .tab { padding: 8px 16px; font-size: 13px; white-space: nowrap; }
+            
+            .section-title { font-size: 14px; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .stats-grid-value { font-size: 24px; }
+            
+            .tab-content { padding: 16px; }
+        }
+        
+        @media (max-width: 480px) {
+            .header { padding: 12px 16px; }
+            .header h1 { font-size: 18px; }
+            .header-stats { gap: 8px; }
+            .stat-card { padding: 8px 10px; }
+            .stat-value { font-size: 18px; }
+            
+            .main-panel { padding: 12px; }
+            .sidebar { max-height: 250px; }
+            
+            .view-title { font-size: 18px; }
+            .score-circle { width: 70px; height: 70px; }
+            .score-circle-value { font-size: 20px; }
+            
+            .tab { padding: 6px 12px; font-size: 12px; }
+            .tab-content { padding: 12px; }
         }
     </style>
 </head>
@@ -162,11 +242,13 @@
             <!-- Date Range Filter -->
             <div style="display: flex; gap: 8px; align-items: center; background: #1a2730; padding: 8px 16px; border-radius: 8px; border: 1px solid #4D889D;">
                 <span style="color: #94a3b8; font-size: 13px; font-weight: 600;">📅 Date Range:</span>
-                <input type="date" id="date-from" onchange="applyDateFilter()" value="2025-11-25"
-                       style="background: #0e313e; border: 1px solid #4D889D; color: #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                <input type="date" id="date-from" onchange="applyDateFilter()"
+                       style="background: #0e313e; border: 1px solid #4D889D; color: #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer;"
+                       placeholder="Start date">
                 <span style="color: #64748b;">to</span>
-                <input type="date" id="date-to" onchange="applyDateFilter()" value="2025-12-15"
-                       style="background: #0e313e; border: 1px solid #4D889D; color: #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer;">
+                <input type="date" id="date-to" onchange="applyDateFilter()"
+                       style="background: #0e313e; border: 1px solid #4D889D; color: #e2e8f0; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer;"
+                       placeholder="End date">
             </div>
             
             <button onclick="openLessonObservationForm()" style="padding: 12px 24px; background: #4F9262; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; transition: all 0.2s;">
@@ -179,7 +261,7 @@
     
     <!-- Horizontal Filters Pane -->
     <div style="background: #1a2730; border-bottom: 1px solid #4D889D; padding: 16px 32px;">
-        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap; max-width: 1400px; margin: 0 auto;">
+        <div class="filter-bar" style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap; max-width: 1400px; margin: 0 auto;">
             <!-- Breadcrumb Navigation -->
             <div style="flex: 1; min-width: 200px;">
                 <div class="breadcrumb" id="breadcrumb">
@@ -325,8 +407,8 @@
             selectedSite: null,
             selectedTrainer: null,
             selectedWeek: null,
-            dateFrom: '2025-11-25',
-            dateTo: '2025-12-15',
+            dateFrom: null,  // No default filter
+            dateTo: null,    // No default filter
             activeTab: 'overview'
         };
 
@@ -541,8 +623,8 @@
 
         // Apply Date Filter
         function applyDateFilter() {
-            state.dateFrom = document.getElementById('date-from').value || '2025-11-25';
-            state.dateTo = document.getElementById('date-to').value || '2025-12-15';
+            state.dateFrom = document.getElementById('date-from').value || null;
+            state.dateTo = document.getElementById('date-to').value || null;
             
             updateHeaderStats();
             renderTrainerList();
@@ -753,19 +835,27 @@
         // (This file is getting long - shall I continue with the full implementation?)
 
         function getScoreColor(score) {
-            if (score >= 4.5) return 'exceptional';
-            if (score >= 4.0) return 'strong';
-            if (score >= 3.5) return 'adequate';
-            if (score >= 3.0) return 'developing';
-            return 'needs-support';
+            if (score <= 1.49) return 'critical';
+            if (score <= 2.49) return 'needs-improvement';
+            if (score <= 3.49) return 'basic';
+            if (score <= 4.49) return 'competent';
+            return 'model';
         }
 
         function getScoreLabel(score) {
-            if (score >= 4.5) return 'Exceptional';
-            if (score >= 4.0) return 'Strong';
-            if (score >= 3.5) return 'Adequate';
-            if (score >= 3.0) return 'Developing';
-            return 'Needs Support';
+            if (score <= 1.49) return 'Requires Critical Development';
+            if (score <= 2.49) return 'Needs Significant Improvement';
+            if (score <= 3.49) return 'Meets Basic Expectations';
+            if (score <= 4.49) return 'Meets Expectations Consistently';
+            return 'Model Performance';
+        }
+        
+        function getScoreDescription(score) {
+            if (score <= 1.49) return 'The trainer requires critical development';
+            if (score <= 2.49) return 'The trainer needs significant improvement';
+            if (score <= 3.49) return 'Trainer meets basic expectations with room for improvement';
+            if (score <= 4.49) return 'The trainer meets expectations consistently; demonstrates solid competence';
+            return 'The trainer demonstrates model performance and can keep it up';
         }
 
         function switchTab(tab) {
@@ -778,15 +868,19 @@
             const data = DEMO_DATA.program;
             const districts = DEMO_DATA.districts;
             
-            // Calculate distribution
+            // Calculate distribution based on new rubric
             const trainers = DEMO_DATA.trainers;
             const distribution = {
-                exceptional: trainers.filter(t => t.stats.average_score >= 4.5).length,
-                strong: trainers.filter(t => t.stats.average_score >= 4.0 && t.stats.average_score < 6.5).length,
-                adequate: trainers.filter(t => t.stats.average_score >= 5.5 && t.stats.average_score < 6.0).length,
-                developing: trainers.filter(t => t.stats.average_score >= 5.0 && t.stats.average_score < 3.5).length,
-                needsSupport: trainers.filter(t => t.stats.average_score < 5.0).length
+                model: trainers.filter(t => t.stats.average_score > 4.49).length,
+                competent: trainers.filter(t => t.stats.average_score > 3.49 && t.stats.average_score <= 4.49).length,
+                basic: trainers.filter(t => t.stats.average_score > 2.49 && t.stats.average_score <= 3.49).length,
+                needsImprovement: trainers.filter(t => t.stats.average_score > 1.49 && t.stats.average_score <= 2.49).length,
+                critical: trainers.filter(t => t.stats.average_score <= 1.49).length
             };
+            
+            // Trainers needing support (≤3.49 - Basic or below)
+            const trainersNeedingSupport = trainers.filter(t => t.stats.average_score <= 3.49)
+                .sort((a, b) => a.stats.average_score - b.stats.average_score); // Lowest scores first
             
             const total = trainers.length;
             
@@ -817,104 +911,123 @@
                     <h3 class="section-title">📈 Performance Distribution</h3>
                     <div style="margin-bottom: 16px;">
                         <div style="display: flex; height: 40px; border-radius: 8px; overflow: hidden;">
-                            <div style="width: ${(distribution.exceptional/total)*100}%; background: #4F9262; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
-                                ${distribution.exceptional > 0 ? distribution.exceptional : ''}
+                            <div style="width: ${(distribution.model/total)*100}%; background: #4F9262; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.model > 0 ? distribution.model : ''}
                             </div>
-                            <div style="width: ${(distribution.strong/total)*100}%; background: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
-                                ${distribution.strong > 0 ? distribution.strong : ''}
+                            <div style="width: ${(distribution.competent/total)*100}%; background: #eab308; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.competent > 0 ? distribution.competent : ''}
                             </div>
-                            <div style="width: ${(distribution.adequate/total)*100}%; background: #eab308; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
-                                ${distribution.adequate > 0 ? distribution.adequate : ''}
+                            <div style="width: ${(distribution.basic/total)*100}%; background: #f59e0b; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.basic > 0 ? distribution.basic : ''}
                             </div>
-                            <div style="width: ${(distribution.developing/total)*100}%; background: #f59e0b; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
-                                ${distribution.developing > 0 ? distribution.developing : ''}
+                            <div style="width: ${(distribution.needsImprovement/total)*100}%; background: #ef4444; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.needsImprovement > 0 ? distribution.needsImprovement : ''}
                             </div>
-                            <div style="width: ${(distribution.needsSupport/total)*100}%; background: #ef4444; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
-                                ${distribution.needsSupport > 0 ? distribution.needsSupport : ''}
+                            <div style="width: ${(distribution.critical/total)*100}%; background: #A03434; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.critical > 0 ? distribution.critical : ''}
                             </div>
                         </div>
                     </div>
                     <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px;">
                         <div style="display: flex; align-items: center; gap: 6px;">
                             <div style="width: 12px; height: 12px; background: #4F9262; border-radius: 3px;"></div>
-                            <span>Exceptional (6.5+): ${distribution.exceptional} (${((distribution.exceptional/total)*100).toFixed(0)}%)</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <div style="width: 12px; height: 12px; background: #22c55e; border-radius: 3px;"></div>
-                            <span>Strong (6.0-6.49): ${distribution.strong} (${((distribution.strong/total)*100).toFixed(0)}%)</span>
+                            <span>Model (>4.49): ${distribution.model} (${((distribution.model/total)*100).toFixed(0)}%)</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 6px;">
                             <div style="width: 12px; height: 12px; background: #eab308; border-radius: 3px;"></div>
-                            <span>Adequate (5.5-5.99): ${distribution.adequate} (${((distribution.adequate/total)*100).toFixed(0)}%)</span>
+                            <span>Competent (3.50-4.49): ${distribution.competent} (${((distribution.competent/total)*100).toFixed(0)}%)</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 6px;">
                             <div style="width: 12px; height: 12px; background: #f59e0b; border-radius: 3px;"></div>
-                            <span>Developing (5.0-5.49): ${distribution.developing} (${((distribution.developing/total)*100).toFixed(0)}%)</span>
+                            <span>Basic (2.50-3.49): ${distribution.basic} (${((distribution.basic/total)*100).toFixed(0)}%)</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 6px;">
                             <div style="width: 12px; height: 12px; background: #ef4444; border-radius: 3px;"></div>
-                            <span>Needs Support (<5.0): ${distribution.needsSupport} (${((distribution.needsSupport/total)*100).toFixed(0)}%)</span>
+                            <span>Needs Improvement (1.50-2.49): ${distribution.needsImprovement} (${((distribution.needsImprovement/total)*100).toFixed(0)}%)</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 12px; height: 12px; background: #A03434; border-radius: 3px;"></div>
+                            <span>Critical (≤1.49): ${distribution.critical} (${((distribution.critical/total)*100).toFixed(0)}%)</span>
                         </div>
                     </div>
                 </div>
                 
                 <div class="section">
-                    <h3 class="section-title">🏆 Trainer Rankings</h3>
-                    <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr style="background: #0e313e; border-bottom: 2px solid #4D889D;">
-                                    <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Rank</th>
-                                    <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Trainer Name</th>
-                                    <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Site</th>
-                                    <th style="padding: 12px; text-align: center; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Observations</th>
-                                    <th style="padding: 12px; text-align: center; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Trend</th>
-                                    <th style="padding: 12px; text-align: right; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Score</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${trainers.sort((a, b) => b.stats.average_score - a.stats.average_score).map((t, i) => `
-                                    <tr style="border-bottom: 1px solid #1a2730; cursor: pointer; transition: background 0.2s;" 
-                                        onclick="selectTrainer('${t.trainer_id}')"
-                                        onmouseover="this.style.background='#0e313e'" 
-                                        onmouseout="this.style.background='transparent'">
-                                        <td style="padding: 12px;">
-                                            <div style="width: 32px; height: 32px; border-radius: 50%; background: ${i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : '#4D889D'}; display: flex; align-items: center; justify-content: center; font-weight: bold; color: ${i < 3 ? '#0e313e' : '#e2e8f0'};">
-                                                ${i + 1}
-                                            </div>
-                                        </td>
-                                        <td style="padding: 12px;">
-                                            <div style="font-weight: 600;">${t.trainer_name}</div>
-                                            <div style="font-size: 11px; color: #64748b;">${t.district_name}</div>
-                                        </td>
-                                        <td style="padding: 12px; font-size: 13px; color: #94a3b8; max-width: 200px;">
-                                            ${t.training_site}
-                                        </td>
-                                        <td style="padding: 12px; text-align: center;">
-                                            <span style="background: #4D889D; padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 14px;">
-                                                ${t.stats.observation_count}
-                                            </span>
-                                        </td>
-                                        <td style="padding: 12px; text-align: center;">
-                                            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: 600; ${
-                                                t.stats.trend === 'improving' ? 'background: #064e3b; color: #4F9262;' : 
-                                                t.stats.trend === 'declining' ? 'background: #7f1d1d; color: #ef4444;' : 
-                                                'background: #1a2730; color: #94a3b8;'
-                                            }">
-                                                ${t.stats.trend === 'improving' ? '📈' : t.stats.trend === 'declining' ? '📉' : '➡️'}
-                                                <span style="text-transform: capitalize;">${t.stats.trend}</span>
-                                            </span>
-                                        </td>
-                                        <td style="padding: 12px; text-align: right;">
-                                            <span class="score-${getScoreColor(t.stats.average_score)}" style="font-weight: bold; font-size: 18px;">
-                                                ${t.stats.average_score.toFixed(2)}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+                    <h3 class="section-title">⚠️ Trainers Needing Support (≤3.49)</h3>
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                        <div style="color: #fca5a5; margin-bottom: 8px;">
+                            <strong>${trainersNeedingSupport.length} of ${total} trainers</strong> are performing below competent level and require focused support.
+                        </div>
+                        <div style="color: #94a3b8; font-size: 13px;">
+                            Use the trainer list on the left to view all trainers. Below are those needing priority attention.
+                        </div>
                     </div>
+                    ${trainersNeedingSupport.length > 0 ? `
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #0e313e; border-bottom: 2px solid #4D889D;">
+                                        <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Priority</th>
+                                        <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Trainer Name</th>
+                                        <th style="padding: 12px; text-align: left; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Site</th>
+                                        <th style="padding: 12px; text-align: center; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Observations</th>
+                                        <th style="padding: 12px; text-align: center; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Level</th>
+                                        <th style="padding: 12px; text-align: right; font-size: 12px; color: #94a3b8; text-transform: uppercase;">Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${trainersNeedingSupport.map((t, i) => `
+                                        <tr style="border-bottom: 1px solid #1a2730; cursor: pointer; transition: background 0.2s;" 
+                                            onclick="selectTrainer('${t.trainer_id}')"
+                                            onmouseover="this.style.background='#0e313e'" 
+                                            onmouseout="this.style.background='transparent'">
+                                            <td style="padding: 12px;">
+                                                <div style="display: flex; align-items: center; gap: 8px;">
+                                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: ${
+                                                        t.stats.average_score <= 1.49 ? '#A03434' : 
+                                                        t.stats.average_score <= 2.49 ? '#ef4444' : '#f59e0b'
+                                                    }; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 14px;">
+                                                        ${i + 1}
+                                                    </div>
+                                                    ${t.stats.average_score <= 1.49 ? '<span style="color: #fca5a5; font-size: 18px;">🚨</span>' : 
+                                                      t.stats.average_score <= 2.49 ? '<span style="color: #fca5a5; font-size: 18px;">⚠️</span>' : 
+                                                      '<span style="color: #fb923c; font-size: 18px;">📍</span>'}
+                                                </div>
+                                            </td>
+                                            <td style="padding: 12px;">
+                                                <div style="font-weight: 600;">${t.trainer_name}</div>
+                                                <div style="font-size: 11px; color: #64748b;">${t.district_name}</div>
+                                            </td>
+                                            <td style="padding: 12px; font-size: 13px; color: #94a3b8; max-width: 200px;">
+                                                ${t.training_site}
+                                            </td>
+                                            <td style="padding: 12px; text-align: center;">
+                                                <span style="background: #4D889D; padding: 4px 12px; border-radius: 4px; font-weight: 600; font-size: 14px;">
+                                                    ${t.stats.observation_count}
+                                                </span>
+                                            </td>
+                                            <td style="padding: 12px; text-align: center;">
+                                                <span style="padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; background: rgba(239, 68, 68, 0.2); color: #fca5a5;">
+                                                    ${getScoreLabel(t.stats.average_score)}
+                                                </span>
+                                            </td>
+                                            <td style="padding: 12px; text-align: right;">
+                                                <span class="score-${getScoreColor(t.stats.average_score)}" style="font-weight: bold; font-size: 18px;">
+                                                    ${t.stats.average_score.toFixed(2)}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    ` : `
+                        <div style="text-align: center; padding: 40px; color: #4F9262;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">🎉</div>
+                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Excellent!</div>
+                            <div style="color: #94a3b8;">All trainers are performing at competent level or above.</div>
+                        </div>
+                    `}
                 </div>
                 
                 <div class="section">
@@ -2347,6 +2460,7 @@
                     <div style="background: #0e313e; padding: 20px; border-radius: 8px; line-height: 1.8; color: #cbd5e1;">
                         <strong>${trainer.trainer_name}</strong> is a ${trainer.trainer_gender} trainer at <strong>${trainer.training_site}</strong> in <strong>${trainer.district_name}</strong>. 
                         Based on <strong>${trainer.stats.observation_count} observations</strong>, their overall average is <strong class="score-${getScoreColor(trainer.stats.average_score)}">${trainer.stats.average_score.toFixed(2)}/5.0 (${getScoreLabel(trainer.stats.average_score)})</strong>. 
+                        <em style="color: #94a3b8;">${getScoreDescription(trainer.stats.average_score)}.</em>
                         They rank <strong>#${districtRank} of ${districtTrainers.length} trainers</strong> in ${trainer.district_name}.
                         <br><br>
                         <strong>KEY STRENGTHS:</strong> ${topComps.map(([name, score]) => `${score.toFixed(1)} in ${name}`).join(' and ')}.
@@ -2713,19 +2827,42 @@ ${claudeResponse}
                 
             } catch (error) {
                 console.error('Claude API Error:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    url: APPS_SCRIPT_URL
+                });
+                
                 container.innerHTML = `
                     <div style="background: #7f1d1d; padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 2px solid #ef4444;">
-                        <div style="color: #fecaca; font-weight: 600; margin-bottom: 12px;">🔐 Claude AI Deep Dive Requires API Configuration</div>
+                        <div style="color: #fecaca; font-weight: 600; margin-bottom: 12px;">🔐 Claude AI Deep Dive Error</div>
                         <div style="color: #fca5a5; font-size: 14px; line-height: 1.6; margin-bottom: 12px;">
-                            <p style="margin-bottom: 8px;">The Claude AI Deep Dive feature requires an Anthropic API key, which cannot be stored in the browser for security reasons.</p>
+                            <p style="margin-bottom: 12px;"><strong>Error:</strong> ${error.message}</p>
                             
-                            <p style="margin-bottom: 8px;"><strong>Options to enable this feature:</strong></p>
+                            <details style="margin-bottom: 12px;">
+                                <summary style="cursor: pointer; color: #fbbf24; margin-bottom: 8px;">🔍 Technical Details (click to expand)</summary>
+                                <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; font-family: monospace; font-size: 12px; margin-top: 8px; white-space: pre-wrap;">
+Apps Script URL: ${APPS_SCRIPT_URL}
+Error Message: ${error.message}
+Error Stack: ${error.stack || 'No stack trace'}
+
+Common Issues:
+1. Apps Script not deployed with doPost() function
+2. API key missing or invalid in Apps Script
+3. Apps Script not set to "Anyone" access
+4. New deployment not yet active (wait 1-2 minutes)
+                                </div>
+                            </details>
+                            
+                            <p style="margin-bottom: 8px;"><strong>Quick Fixes:</strong></p>
                             <ol style="margin-left: 20px; margin-bottom: 12px;">
-                                <li>Add API key to your Google Apps Script backend (recommended for production)</li>
-                                <li>Use the rule-based insights below (available now, no setup required)</li>
+                                <li>Check browser console (F12) for detailed error</li>
+                                <li>Verify Apps Script has API key: sk-ant-api03-r2ZWn2...</li>
+                                <li>Ensure Apps Script is deployed with "Execute as: Me" and "Who has access: Anyone"</li>
+                                <li>Wait 1-2 minutes after deploying for changes to take effect</li>
                             </ol>
                             
-                            <p style="font-size: 13px; color: #fbbf24;">💡 The rule-based insights provide comprehensive, actionable recommendations and work instantly without any API setup.</p>
+                            <p style="font-size: 13px; color: #fbbf24;">💡 Meanwhile, use the rule-based insights below which work instantly without API setup.</p>
                         </div>
                         <button onclick="document.getElementById('claude-insights-container').innerHTML=''" 
                                 style="margin-top: 12px; padding: 8px 16px; background: rgba(255,255,255,0.1); color: #fecaca; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; font-size: 12px;">
