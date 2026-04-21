@@ -236,7 +236,7 @@
     <div class="header">
         <div>
             <h1>Trainer Performance Dashboard</h1>
-            <div class="header-subtitle">E!BA Bootcamp 2025 • Educate! Uganda</div>
+            <div class="header-subtitle">E!BA Bootcamp • Educate! Uganda</div>
         </div>
         <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
             <!-- Date Range Filter -->
@@ -285,16 +285,6 @@
                     </select>
                 </div>
                 
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <span style="color: #94a3b8; font-size: 13px; font-weight: 600;">📅</span>
-                    <select class="filter-select" id="week-filter" onchange="selectWeek()" style="min-width: 120px;">
-                        <option value="">All Weeks</option>
-                        <option value="WEEK1">Week 1</option>
-                        <option value="WEEK2">Week 2</option>
-                        <option value="WEEK3">Week 3</option>
-                    </select>
-                </div>
-                
                 <button class="clear-btn" onclick="clearFilters()" style="padding: 8px 16px; background: #4D889D; color: #e2e8f0; border: 1px solid #475569; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s;"
                         onmouseover="this.style.background='#475569'" 
                         onmouseout="this.style.background='#4D889D'">
@@ -324,7 +314,7 @@
         // Global data object - will be populated from Google Sheets via Apps Script
         let DEMO_DATA = {
             program: {
-                name: 'E!BA Bootcamp 2025',
+                name: 'E!BA Bootcamp',
                 trainers: 0,
                 observations: 0,
                 average: 0,
@@ -406,7 +396,6 @@
             selectedDistrict: null,
             selectedSite: null,
             selectedTrainer: null,
-            selectedWeek: null,
             dateFrom: null,  // No default filter
             dateTo: null,    // No default filter
             activeTab: 'overview'
@@ -557,6 +546,8 @@
         // Select District
         function selectDistrict() {
             const districtName = document.getElementById('district-filter').value;
+            console.log('selectDistrict called:', districtName);
+            
             if (districtName) {
                 state.level = 'district';
                 state.selectedDistrict = districtName;
@@ -564,11 +555,15 @@
                 state.selectedTrainer = null;
                 state.activeTab = 'overview';
                 
+                console.log('State updated:', state);
+                
                 // Update site filter - get sites for this district
                 const siteSelect = document.getElementById('site-filter');
                 siteSelect.innerHTML = '<option value="">All Sites</option>';
                 
                 const districtSites = DEMO_DATA.sites.filter(s => s.district === districtName);
+                console.log('Sites for district:', districtSites.length);
+                
                 districtSites.forEach(site => {
                     const option = document.createElement('option');
                     option.value = site.name;
@@ -585,10 +580,12 @@
                 document.getElementById('site-filter').innerHTML = '<option value="">All Sites</option>';
             }
             
+            console.log('Calling updateHeaderStats, renderBreadcrumb, renderTrainerList, renderView');
             updateHeaderStats();
             renderBreadcrumb();
             renderTrainerList();
             renderView();
+            console.log('District selection complete');
         }
 
         // Select Site
@@ -612,15 +609,6 @@
         }
 
         // Select Week
-        function selectWeek() {
-            const weekValue = document.getElementById('week-filter').value;
-            state.selectedWeek = weekValue || null;
-            
-            updateHeaderStats();
-            renderTrainerList();
-            renderView();
-        }
-
         // Apply Date Filter
         function applyDateFilter() {
             state.dateFrom = document.getElementById('date-from').value || null;
@@ -674,13 +662,11 @@
             state.selectedDistrict = null;
             state.selectedSite = null;
             state.selectedTrainer = null;
-            state.selectedWeek = null;
             state.dateFrom = '2025-11-25';
             state.dateTo = '2025-12-15';
             
             document.getElementById('district-filter').value = '';
             document.getElementById('site-filter').value = '';
-            document.getElementById('week-filter').value = '';
             document.getElementById('date-from').value = '2025-11-25';
             document.getElementById('date-to').value = '2025-12-15';
             document.getElementById('site-filter').innerHTML = '<option value="">All Sites</option>';
@@ -740,13 +726,6 @@
             // Filter by site
             if (state.selectedSite) {
                 trainers = trainers.filter(t => t.training_site === state.selectedSite);
-            }
-            
-            // Filter by week - only show trainers who have observations in the selected week
-            if (state.selectedWeek) {
-                trainers = trainers.filter(t => 
-                    t.observations.some(obs => obs.week === state.selectedWeek)
-                );
             }
             
             // Filter by date range - only show trainers with observations in the date range
@@ -1031,6 +1010,24 @@
                 </div>
                 
                 <div class="section">
+                    <h3 class="section-title">📊 Performance Trends</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                        ${[
+                            { label: 'Improving', count: trainers.filter(t => t.stats.trend === 'improving').length, color: '#4F9262', icon: '📈' },
+                            { label: 'Stable', count: trainers.filter(t => t.stats.trend === 'stable').length, color: '#94a3b8', icon: '➡️' },
+                            { label: 'Declining', count: trainers.filter(t => t.stats.trend === 'declining').length, color: '#ef4444', icon: '📉' }
+                        ].map(trend => `
+                            <div style="background: #0e313e; padding: 20px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 32px; margin-bottom: 8px;">${trend.icon}</div>
+                                <div style="font-size: 28px; font-weight: bold; color: ${trend.color};">${trend.count}</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">${trend.label}</div>
+                                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${((trend.count/trainers.length)*100).toFixed(0)}% of trainers</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="section">
                     <h3 class="section-title">📍 District Rankings</h3>
                     ${districts.sort((a, b) => b.average - a.average).map((d, i) => `
                         <div style="display: grid; grid-template-columns: 40px 1fr 80px 100px; gap: 12px; align-items: center; padding: 12px; background: #0e313e; border-radius: 8px; margin-bottom: 8px; cursor: pointer;" onclick="document.getElementById('district-filter').value='${d.name}'; selectDistrict();">
@@ -1195,7 +1192,7 @@
                     <h3 class="section-title">📋 Executive Summary</h3>
                     <div style="background: #0e313e; padding: 20px; border-radius: 8px; line-height: 1.8;">
                         <p style="color: #cbd5e1;">
-                            The <strong>E!BA Bootcamp 2025 program</strong> comprises <strong>${trainers.length} trainers</strong> across 
+                            The <strong>E!BA Bootcamp program</strong> comprises <strong>${trainers.length} trainers</strong> across 
                             <strong>${DEMO_DATA.program.districts} districts</strong>, with <strong>${DEMO_DATA.program.observations} total observations</strong> 
                             conducted from November 25 to December 15, 2025.
                         </p>
@@ -1358,10 +1355,24 @@
         function renderDistrictView() {
             const districtName = state.selectedDistrict;
             const district = DEMO_DATA.districts.find(d => d.name === districtName);
-            if (!district) return '<p>District not found</p>';
+            
+            if (!district) {
+                console.error('District not found:', districtName);
+                console.log('Available districts:', DEMO_DATA.districts.map(d => d.name));
+                return `<p style="padding: 40px; text-align: center; color: #ef4444;">District "${districtName}" not found. Please try another district.</p>`;
+            }
+            
+            // Get sites for this district
+            if (!district.sites) {
+                district.sites = DEMO_DATA.sites
+                    .filter(s => s.district === districtName)
+                    .map(s => s.name);
+            }
             
             const districtTrainers = DEMO_DATA.trainers.filter(t => t.district_name === districtName);
             const programAvg = DEMO_DATA.program.average;
+            
+            console.log('Rendering district view:', districtName, 'Trainers:', districtTrainers.length);
             
             return `
                 <div class="view-header">
@@ -1390,12 +1401,13 @@
         }
 
         function renderDistrictOverview(district, districtTrainers) {
+            // Distribution based on E!BA rubric
             const distribution = {
-                exceptional: districtTrainers.filter(t => t.stats.average_score >= 4.5).length,
-                strong: districtTrainers.filter(t => t.stats.average_score >= 4.0 && t.stats.average_score < 6.5).length,
-                adequate: districtTrainers.filter(t => t.stats.average_score >= 5.5 && t.stats.average_score < 6.0).length,
-                developing: districtTrainers.filter(t => t.stats.average_score >= 5.0 && t.stats.average_score < 3.5).length,
-                needsSupport: districtTrainers.filter(t => t.stats.average_score < 5.0).length
+                model: districtTrainers.filter(t => t.stats.average_score > 4.49).length,
+                competent: districtTrainers.filter(t => t.stats.average_score > 3.49 && t.stats.average_score <= 4.49).length,
+                basic: districtTrainers.filter(t => t.stats.average_score > 2.49 && t.stats.average_score <= 3.49).length,
+                needsImprovement: districtTrainers.filter(t => t.stats.average_score > 1.49 && t.stats.average_score <= 2.49).length,
+                critical: districtTrainers.filter(t => t.stats.average_score <= 1.49).length
             };
             
             const total = districtTrainers.length;
@@ -1427,18 +1439,43 @@
                     <h3 class="section-title">📈 Performance Distribution</h3>
                     <div style="margin-bottom: 16px;">
                         <div style="display: flex; height: 40px; border-radius: 8px; overflow: hidden;">
-                            <div style="width: ${(distribution.exceptional/total)*100}%; background: #4F9262; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
-                                ${distribution.exceptional > 0 ? distribution.exceptional : ''}
+                            <div style="width: ${(distribution.model/total)*100}%; background: #4F9262; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.model > 0 ? distribution.model : ''}
                             </div>
-                            <div style="width: ${(distribution.strong/total)*100}%; background: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
-                                ${distribution.strong > 0 ? distribution.strong : ''}
+                            <div style="width: ${(distribution.competent/total)*100}%; background: #eab308; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.competent > 0 ? distribution.competent : ''}
                             </div>
-                            <div style="width: ${(distribution.adequate/total)*100}%; background: #eab308; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
-                                ${distribution.adequate > 0 ? distribution.adequate : ''}
+                            <div style="width: ${(distribution.basic/total)*100}%; background: #f59e0b; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.basic > 0 ? distribution.basic : ''}
                             </div>
-                            <div style="width: ${(distribution.developing/total)*100}%; background: #f59e0b; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
-                                ${distribution.developing > 0 ? distribution.developing : ''}
+                            <div style="width: ${(distribution.needsImprovement/total)*100}%; background: #ef4444; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.needsImprovement > 0 ? distribution.needsImprovement : ''}
                             </div>
+                            <div style="width: ${(distribution.critical/total)*100}%; background: #A03434; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">
+                                ${distribution.critical > 0 ? distribution.critical : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 12px; height: 12px; background: #4F9262; border-radius: 3px;"></div>
+                            <span>✅ Model (>4.49): ${distribution.model}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 12px; height: 12px; background: #eab308; border-radius: 3px;"></div>
+                            <span>🟢 Competent (3.50-4.49): ${distribution.competent}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 12px; height: 12px; background: #f59e0b; border-radius: 3px;"></div>
+                            <span>🟡 Basic (2.50-3.49): ${distribution.basic}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 12px; height: 12px; background: #ef4444; border-radius: 3px;"></div>
+                            <span>🟠 Needs Improvement (1.50-2.49): ${distribution.needsImprovement}</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <div style="width: 12px; height: 12px; background: #A03434; border-radius: 3px;"></div>
+                            <span>🔴 Critical (≤1.49): ${distribution.critical}</span>
                         </div>
                     </div>
                 </div>
@@ -1482,10 +1519,71 @@
                         `;
                     }).join('')}
                 </div>
+                
+                <div class="section">
+                    <h3 class="section-title">📊 Performance Trends</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                        ${[
+                            { label: 'Improving', count: districtTrainers.filter(t => t.stats.trend === 'improving').length, color: '#4F9262', icon: '📈' },
+                            { label: 'Stable', count: districtTrainers.filter(t => t.stats.trend === 'stable').length, color: '#94a3b8', icon: '➡️' },
+                            { label: 'Declining', count: districtTrainers.filter(t => t.stats.trend === 'declining').length, color: '#ef4444', icon: '📉' }
+                        ].map(trend => `
+                            <div style="background: #0e313e; padding: 20px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 32px; margin-bottom: 8px;">${trend.icon}</div>
+                                <div style="font-size: 28px; font-weight: bold; color: ${trend.color};">${trend.count}</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">${trend.label}</div>
+                                <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${((trend.count/districtTrainers.length)*100).toFixed(0)}% of trainers</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
             `;
         }
 
         function renderDistrictComparisons(district, districtTrainers, programAvg) {
+            // Gender comparison
+            const maleTrainers = districtTrainers.filter(t => t.trainer_gender === 'Male');
+            const femaleTrainers = districtTrainers.filter(t => t.trainer_gender === 'Female');
+            const maleAvg = maleTrainers.length > 0 ? maleTrainers.reduce((sum, t) => sum + t.stats.average_score, 0) / maleTrainers.length : 0;
+            const femaleAvg = femaleTrainers.length > 0 ? femaleTrainers.reduce((sum, t) => sum + t.stats.average_score, 0) / femaleTrainers.length : 0;
+            
+            // Weekly trends
+            const weeklyData = {};
+            districtTrainers.forEach(trainer => {
+                if (trainer.observations && Array.isArray(trainer.observations)) {
+                    trainer.observations.forEach(obs => {
+                        // Try different week field names
+                        const weekKey = obs.Week || obs.week || obs.week_number || obs.training_week || obs.observation_week;
+                        if (weekKey && obs.overall_score) {
+                            if (!weeklyData[weekKey]) {
+                                weeklyData[weekKey] = { total: 0, count: 0 };
+                            }
+                            weeklyData[weekKey].total += parseFloat(obs.overall_score);
+                            weeklyData[weekKey].count++;
+                        }
+                    });
+                }
+            });
+            const weeks = Object.keys(weeklyData).sort();
+            const weeklyAverages = weeks.map(week => ({
+                week,
+                avg: weeklyData[week].total / weeklyData[week].count
+            }));
+            
+            // Debug logging
+            console.log('District Comparisons - Weekly Data:', {
+                districtName: district.name,
+                weeklyData,
+                weeks,
+                weeklyAverages,
+                sampleObservations: districtTrainers[0]?.observations?.slice(0, 2)
+            });
+            
+            // Trend analysis
+            const improving = districtTrainers.filter(t => t.stats.trend === 'improving').length;
+            const stable = districtTrainers.filter(t => t.stats.trend === 'stable').length;
+            const declining = districtTrainers.filter(t => t.stats.trend === 'declining').length;
+            
             return `
                 <div class="section">
                     <h3 class="section-title">📊 ${district.name} vs Program</h3>
@@ -1500,7 +1598,7 @@
                             <div class="comparison-compare-score">${programAvg.toFixed(2)}</div>
                         </div>
                         <div style="height: 8px; background: #0e313e; border-radius: 4px; overflow: hidden; margin: 12px 0;">
-                            <div style="height: 100%; width: ${(district.average/7)*100}%; background: ${district.average >= programAvg ? '#4F9262' : '#f59e0b'};"></div>
+                            <div style="height: 100%; width: ${(district.average/5)*100}%; background: ${district.average >= programAvg ? '#4F9262' : '#f59e0b'};"></div>
                         </div>
                         <div class="comparison-meta">
                             <span style="color: ${district.average >= programAvg ? '#4F9262' : '#ef4444'};">
@@ -1512,13 +1610,125 @@
                 </div>
                 
                 <div class="section">
+                    <h3 class="section-title">👥 Gender Comparison</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                        <div style="background: #0e313e; padding: 20px; border-radius: 8px; border-left: 4px solid #4D889D;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                <span style="font-size: 32px;">👨</span>
+                                <div>
+                                    <div style="font-size: 14px; color: #94a3b8;">Male Trainers</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #4D889D;">${maleTrainers.length}</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #1a2730;">
+                                <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Average Score</div>
+                                <div style="font-size: 28px; font-weight: bold;" class="score-${getScoreColor(maleAvg)}">
+                                    ${maleAvg.toFixed(2)}
+                                </div>
+                                <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
+                                    ${getScoreLabel(maleAvg)}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #0e313e; padding: 20px; border-radius: 8px; border-left: 4px solid #F1A01B;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                <span style="font-size: 32px;">👩</span>
+                                <div>
+                                    <div style="font-size: 14px; color: #94a3b8;">Female Trainers</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #F1A01B;">${femaleTrainers.length}</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #1a2730;">
+                                <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Average Score</div>
+                                <div style="font-size: 28px; font-weight: bold;" class="score-${getScoreColor(femaleAvg)}">
+                                    ${femaleAvg.toFixed(2)}
+                                </div>
+                                <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
+                                    ${getScoreLabel(femaleAvg)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    ${maleTrainers.length > 0 && femaleTrainers.length > 0 ? `
+                        <div style="margin-top: 16px; padding: 12px; background: rgba(241, 160, 27, 0.1); border-radius: 8px; border-left: 4px solid #F1A01B;">
+                            <div style="font-size: 13px; color: #e2e8f0;">
+                                <strong>${maleAvg > femaleAvg ? 'Male' : 'Female'} trainers</strong> are performing 
+                                <strong>${Math.abs(maleAvg - femaleAvg).toFixed(2)} points ${maleAvg > femaleAvg ? 'higher' : 'lower'}</strong> 
+                                on average in ${district.name}.
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+                
+                ${weeklyAverages.length > 1 ? `
+                <div class="section">
+                    <h3 class="section-title">📈 Weekly Performance Trends</h3>
+                    <div style="background: #0e313e; padding: 20px; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: end; height: 200px; gap: 12px;">
+                            ${weeklyAverages.map((w, i) => {
+                                const maxScore = 5;
+                                const heightPercent = (w.avg / maxScore) * 100;
+                                const isHighest = w.avg === Math.max(...weeklyAverages.map(wa => wa.avg));
+                                return `
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                        <div style="font-size: 13px; font-weight: 600;" class="score-${getScoreColor(w.avg)}">
+                                            ${w.avg.toFixed(2)}
+                                        </div>
+                                        <div style="width: 100%; height: ${heightPercent}%; background: ${isHighest ? '#4F9262' : '#4D889D'}; border-radius: 4px 4px 0 0; min-height: 20px; display: flex; align-items: start; justify-content: center; padding-top: 8px;">
+                                            ${isHighest ? '<span style="font-size: 16px;">🏆</span>' : ''}
+                                        </div>
+                                        <div style="font-size: 11px; color: #94a3b8; text-align: center;">
+                                            Week ${i + 1}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #1a2730; font-size: 13px; color: #94a3b8;">
+                            ${weeklyAverages[weeklyAverages.length - 1].avg > weeklyAverages[0].avg ? 
+                                `📈 <span style="color: #4F9262;">Positive trend:</span> Performance improved from ${weeklyAverages[0].avg.toFixed(2)} (Week 1) to ${weeklyAverages[weeklyAverages.length - 1].avg.toFixed(2)} (Week ${weeklyAverages.length})` :
+                                weeklyAverages[weeklyAverages.length - 1].avg < weeklyAverages[0].avg ?
+                                `📉 <span style="color: #ef4444;">Declining trend:</span> Performance decreased from ${weeklyAverages[0].avg.toFixed(2)} (Week 1) to ${weeklyAverages[weeklyAverages.length - 1].avg.toFixed(2)} (Week ${weeklyAverages.length})` :
+                                `➡️ <span style="color: #94a3b8;">Stable performance:</span> Maintaining ${weeklyAverages[0].avg.toFixed(2)} across ${weeklyAverages.length} weeks`
+                            }
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div class="section">
+                    <h3 class="section-title">📊 Performance Trajectory</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;">
+                        <div style="background: #0e313e; padding: 16px; border-radius: 8px; border-left: 4px solid #4F9262;">
+                            <div style="font-size: 28px; margin-bottom: 8px;">📈</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #4F9262;">${improving}</div>
+                            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Improving</div>
+                            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${((improving/districtTrainers.length)*100).toFixed(0)}% of trainers</div>
+                        </div>
+                        <div style="background: #0e313e; padding: 16px; border-radius: 8px; border-left: 4px solid #94a3b8;">
+                            <div style="font-size: 28px; margin-bottom: 8px;">➡️</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #94a3b8;">${stable}</div>
+                            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Stable</div>
+                            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${((stable/districtTrainers.length)*100).toFixed(0)}% of trainers</div>
+                        </div>
+                        <div style="background: #0e313e; padding: 16px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                            <div style="font-size: 28px; margin-bottom: 8px;">📉</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #ef4444;">${declining}</div>
+                            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Declining</div>
+                            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${((declining/districtTrainers.length)*100).toFixed(0)}% of trainers</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
                     <h3 class="section-title">🏫 Site Rankings within ${district.name}</h3>
                     ${district.sites.map((site, i) => {
                         const siteTrainers = districtTrainers.filter(t => t.training_site === site);
                         const siteAvg = siteTrainers.reduce((sum, t) => sum + t.stats.average_score, 0) / siteTrainers.length;
                         return { site, avg: siteAvg, trainers: siteTrainers.length };
                     }).sort((a, b) => b.avg - a.avg).map((s, i) => `
-                        <div style="display: grid; grid-template-columns: 40px 1fr 80px 120px; gap: 12px; align-items: center; padding: 12px; background: #0e313e; border-radius: 8px; margin-bottom: 8px;">
+                        <div style="display: grid; grid-template-columns: 40px 1fr 80px 120px; gap: 12px; align-items: center; padding: 12px; background: #0e313e; border-radius: 8px; margin-bottom: 8px; cursor: pointer;" onclick="document.getElementById('site-filter').value='${s.site}'; selectSite();">
                             <div style="font-weight: bold; color: ${i === 0 ? '#fbbf24' : '#94a3b8'}; font-size: 18px;">
                                 #${i + 1}
                             </div>
@@ -1539,8 +1749,8 @@
         }
 
         function renderDistrictInsights(district, districtTrainers, programAvg) {
-            const needsAttention = districtTrainers.filter(t => t.stats.average_score < 3.5);
-            const highPerformers = districtTrainers.filter(t => t.stats.average_score >= 4.5);
+            const needsAttention = districtTrainers.filter(t => t.stats.average_score <= 3.49);
+            const highPerformers = districtTrainers.filter(t => t.stats.average_score > 4.49);
             
             return `
                 <div class="section">
@@ -1564,7 +1774,7 @@
                             <div class="insight-title strength">Strong Trainer Cohort</div>
                             <div class="insight-text">
                                 ${highPerformers.length} trainer${highPerformers.length !== 1 ? 's' : ''} (${((highPerformers.length/district.trainers)*100).toFixed(0)}%) 
-                                performing at Exceptional levels (6.5+). These trainers can serve as mentors and models for others in the district.
+                                performing at Model levels (>4.49). These trainers can serve as mentors and models for others in the district.
                             </div>
                         </div>
                     ` : ''}
@@ -1586,13 +1796,13 @@
                             <div class="insight-title warning">Trainers Needing Support</div>
                             <div class="insight-text">
                                 ${needsAttention.length} trainer${needsAttention.length !== 1 ? 's' : ''} in ${district.name} 
-                                ${needsAttention.length !== 1 ? 'are' : 'is'} scoring below 5.5. Recommend intensive mentorship and targeted coaching.
+                                ${needsAttention.length !== 1 ? 'are' : 'is'} scoring at Basic level or below (≤3.49). Recommend intensive mentorship and targeted coaching.
                             </div>
                         </div>
                         ${needsAttention.map(t => `
                             <div style="padding: 12px; background: #7f1d1d20; border-radius: 8px; border-left: 4px solid #ef4444; margin-bottom: 8px; cursor: pointer;" onclick="selectTrainer('${t.trainer_id}')">
                                 <div style="font-weight: 600;">${t.trainer_name}</div>
-                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">${t.training_site} • Score: ${t.stats.average_score.toFixed(2)}</div>
+                                <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">${t.training_site} • Score: ${t.stats.average_score.toFixed(2)} • ${getScoreLabel(t.stats.average_score)}</div>
                             </div>
                         `).join('')}
                     </div>
@@ -1701,12 +1911,13 @@
         }
 
         function renderSiteOverview(site, siteTrainers) {
+            // Distribution based on E!BA rubric
             const distribution = {
-                exceptional: siteTrainers.filter(t => t.stats.average_score >= 4.5).length,
-                strong: siteTrainers.filter(t => t.stats.average_score >= 4.0 && t.stats.average_score < 6.5).length,
-                adequate: siteTrainers.filter(t => t.stats.average_score >= 5.5 && t.stats.average_score < 6.0).length,
-                developing: siteTrainers.filter(t => t.stats.average_score >= 5.0 && t.stats.average_score < 3.5).length,
-                needsSupport: siteTrainers.filter(t => t.stats.average_score < 5.0).length
+                model: siteTrainers.filter(t => t.stats.average_score > 4.49).length,
+                competent: siteTrainers.filter(t => t.stats.average_score > 3.49 && t.stats.average_score <= 4.49).length,
+                basic: siteTrainers.filter(t => t.stats.average_score > 2.49 && t.stats.average_score <= 3.49).length,
+                needsImprovement: siteTrainers.filter(t => t.stats.average_score > 1.49 && t.stats.average_score <= 2.49).length,
+                critical: siteTrainers.filter(t => t.stats.average_score <= 1.49).length
             };
             
             return `
@@ -1736,15 +1947,17 @@
                     <h3 class="section-title">📈 Trainer Distribution at Site</h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px;">
                         ${[
-                            { label: 'Exceptional', count: distribution.exceptional, color: '#4F9262' },
-                            { label: 'Strong', count: distribution.strong, color: '#22c55e' },
-                            { label: 'Adequate', count: distribution.adequate, color: '#eab308' },
-                            { label: 'Developing', count: distribution.developing, color: '#f59e0b' },
-                            { label: 'Needs Support', count: distribution.needsSupport, color: '#ef4444' }
+                            { label: 'Model', sublabel: '>4.49', count: distribution.model, color: '#4F9262', icon: '✅' },
+                            { label: 'Competent', sublabel: '3.50-4.49', count: distribution.competent, color: '#eab308', icon: '🟢' },
+                            { label: 'Basic', sublabel: '2.50-3.49', count: distribution.basic, color: '#f59e0b', icon: '🟡' },
+                            { label: 'Needs Improvement', sublabel: '1.50-2.49', count: distribution.needsImprovement, color: '#ef4444', icon: '🟠' },
+                            { label: 'Critical', sublabel: '≤1.49', count: distribution.critical, color: '#A03434', icon: '🔴' }
                         ].map(d => `
                             <div style="background: #0e313e; padding: 16px; border-radius: 8px; text-align: center; border-left: 4px solid ${d.color};">
+                                <div style="font-size: 20px; margin-bottom: 4px;">${d.icon}</div>
                                 <div style="font-size: 28px; font-weight: bold; color: ${d.color};">${d.count}</div>
-                                <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">${d.label}</div>
+                                <div style="font-size: 12px; font-weight: 600; color: #e2e8f0; margin-top: 4px;">${d.label}</div>
+                                <div style="font-size: 10px; color: #64748b; margin-top: 2px;">${d.sublabel}</div>
                             </div>
                         `).join('')}
                     </div>
@@ -1797,6 +2010,40 @@
             const programAvg = DEMO_DATA.program.average;
             const districtAvg = district ? district.average : programAvg;
             
+            // Gender comparison
+            const maleTrainers = siteTrainers.filter(t => t.trainer_gender === 'Male');
+            const femaleTrainers = siteTrainers.filter(t => t.trainer_gender === 'Female');
+            const maleAvg = maleTrainers.length > 0 ? maleTrainers.reduce((sum, t) => sum + t.stats.average_score, 0) / maleTrainers.length : 0;
+            const femaleAvg = femaleTrainers.length > 0 ? femaleTrainers.reduce((sum, t) => sum + t.stats.average_score, 0) / femaleTrainers.length : 0;
+            
+            // Weekly trends
+            const weeklyData = {};
+            siteTrainers.forEach(trainer => {
+                if (trainer.observations && Array.isArray(trainer.observations)) {
+                    trainer.observations.forEach(obs => {
+                        // Try different week field names
+                        const weekKey = obs.Week || obs.week || obs.week_number || obs.training_week || obs.observation_week;
+                        if (weekKey && obs.overall_score) {
+                            if (!weeklyData[weekKey]) {
+                                weeklyData[weekKey] = { total: 0, count: 0 };
+                            }
+                            weeklyData[weekKey].total += parseFloat(obs.overall_score);
+                            weeklyData[weekKey].count++;
+                        }
+                    });
+                }
+            });
+            const weeks = Object.keys(weeklyData).sort();
+            const weeklyAverages = weeks.map(week => ({
+                week,
+                avg: weeklyData[week].total / weeklyData[week].count
+            }));
+            
+            // Trend analysis
+            const improving = siteTrainers.filter(t => t.stats.trend === 'improving').length;
+            const stable = siteTrainers.filter(t => t.stats.trend === 'stable').length;
+            const declining = siteTrainers.filter(t => t.stats.trend === 'declining').length;
+            
             return `
                 <div class="section">
                     <h3 class="section-title">📊 Site Performance Comparisons</h3>
@@ -1836,6 +2083,120 @@
                         </div>
                     </div>
                 </div>
+                
+                ${siteTrainers.length > 1 && (maleTrainers.length > 0 && femaleTrainers.length > 0) ? `
+                <div class="section">
+                    <h3 class="section-title">👥 Gender Comparison</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+                        <div style="background: #0e313e; padding: 20px; border-radius: 8px; border-left: 4px solid #4D889D;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                <span style="font-size: 32px;">👨</span>
+                                <div>
+                                    <div style="font-size: 14px; color: #94a3b8;">Male Trainers</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #4D889D;">${maleTrainers.length}</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #1a2730;">
+                                <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Average Score</div>
+                                <div style="font-size: 28px; font-weight: bold;" class="score-${getScoreColor(maleAvg)}">
+                                    ${maleAvg.toFixed(2)}
+                                </div>
+                                <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
+                                    ${getScoreLabel(maleAvg)}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #0e313e; padding: 20px; border-radius: 8px; border-left: 4px solid #F1A01B;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                <span style="font-size: 32px;">👩</span>
+                                <div>
+                                    <div style="font-size: 14px; color: #94a3b8;">Female Trainers</div>
+                                    <div style="font-size: 24px; font-weight: bold; color: #F1A01B;">${femaleTrainers.length}</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #1a2730;">
+                                <div style="font-size: 12px; color: #94a3b8; margin-bottom: 4px;">Average Score</div>
+                                <div style="font-size: 28px; font-weight: bold;" class="score-${getScoreColor(femaleAvg)}">
+                                    ${femaleAvg.toFixed(2)}
+                                </div>
+                                <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
+                                    ${getScoreLabel(femaleAvg)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 16px; padding: 12px; background: rgba(241, 160, 27, 0.1); border-radius: 8px; border-left: 4px solid #F1A01B;">
+                        <div style="font-size: 13px; color: #e2e8f0;">
+                            <strong>${maleAvg > femaleAvg ? 'Male' : 'Female'} trainers</strong> are performing 
+                            <strong>${Math.abs(maleAvg - femaleAvg).toFixed(2)} points ${maleAvg > femaleAvg ? 'higher' : 'lower'}</strong> 
+                            on average at ${site.name}.
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${weeklyAverages.length > 1 ? `
+                <div class="section">
+                    <h3 class="section-title">📈 Weekly Performance Trends</h3>
+                    <div style="background: #0e313e; padding: 20px; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: end; height: 200px; gap: 12px;">
+                            ${weeklyAverages.map((w, i) => {
+                                const maxScore = 5;
+                                const heightPercent = (w.avg / maxScore) * 100;
+                                const isHighest = w.avg === Math.max(...weeklyAverages.map(wa => wa.avg));
+                                return `
+                                    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                        <div style="font-size: 13px; font-weight: 600;" class="score-${getScoreColor(w.avg)}">
+                                            ${w.avg.toFixed(2)}
+                                        </div>
+                                        <div style="width: 100%; height: ${heightPercent}%; background: ${isHighest ? '#4F9262' : '#4D889D'}; border-radius: 4px 4px 0 0; min-height: 20px; display: flex; align-items: start; justify-content: center; padding-top: 8px;">
+                                            ${isHighest ? '<span style="font-size: 16px;">🏆</span>' : ''}
+                                        </div>
+                                        <div style="font-size: 11px; color: #94a3b8; text-align: center;">
+                                            Week ${i + 1}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #1a2730; font-size: 13px; color: #94a3b8;">
+                            ${weeklyAverages[weeklyAverages.length - 1].avg > weeklyAverages[0].avg ? 
+                                `📈 <span style="color: #4F9262;">Positive trend:</span> Performance improved from ${weeklyAverages[0].avg.toFixed(2)} (Week 1) to ${weeklyAverages[weeklyAverages.length - 1].avg.toFixed(2)} (Week ${weeklyAverages.length})` :
+                                weeklyAverages[weeklyAverages.length - 1].avg < weeklyAverages[0].avg ?
+                                `📉 <span style="color: #ef4444;">Declining trend:</span> Performance decreased from ${weeklyAverages[0].avg.toFixed(2)} (Week 1) to ${weeklyAverages[weeklyAverages.length - 1].avg.toFixed(2)} (Week ${weeklyAverages.length})` :
+                                `➡️ <span style="color: #94a3b8;">Stable performance:</span> Maintaining ${weeklyAverages[0].avg.toFixed(2)} across ${weeklyAverages.length} weeks`
+                            }
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${siteTrainers.length > 1 ? `
+                <div class="section">
+                    <h3 class="section-title">📊 Performance Trajectory</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;">
+                        <div style="background: #0e313e; padding: 16px; border-radius: 8px; border-left: 4px solid #4F9262;">
+                            <div style="font-size: 28px; margin-bottom: 8px;">📈</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #4F9262;">${improving}</div>
+                            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Improving</div>
+                            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${((improving/siteTrainers.length)*100).toFixed(0)}% of trainers</div>
+                        </div>
+                        <div style="background: #0e313e; padding: 16px; border-radius: 8px; border-left: 4px solid #94a3b8;">
+                            <div style="font-size: 28px; margin-bottom: 8px;">➡️</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #94a3b8;">${stable}</div>
+                            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Stable</div>
+                            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${((stable/siteTrainers.length)*100).toFixed(0)}% of trainers</div>
+                        </div>
+                        <div style="background: #0e313e; padding: 16px; border-radius: 8px; border-left: 4px solid #ef4444;">
+                            <div style="font-size: 28px; margin-bottom: 8px;">📉</div>
+                            <div style="font-size: 24px; font-weight: bold; color: #ef4444;">${declining}</div>
+                            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Declining</div>
+                            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${((declining/siteTrainers.length)*100).toFixed(0)}% of trainers</div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
                 
                 <div class="section">
                     <h3 class="section-title">👥 Trainer Rankings at Site</h3>
@@ -1899,8 +2260,8 @@
         }
 
         function renderSiteInsights(site, siteTrainers) {
-            const needsAttention = siteTrainers.filter(t => t.stats.average_score < 3.5);
-            const highPerformers = siteTrainers.filter(t => t.stats.average_score >= 4.5);
+            const needsAttention = siteTrainers.filter(t => t.stats.average_score <= 3.49);
+            const highPerformers = siteTrainers.filter(t => t.stats.average_score > 4.49);
             const district = DEMO_DATA.districts.find(d => d.name === site.district);
             const districtAvg = district ? district.average : DEMO_DATA.program.average;
             
@@ -1926,7 +2287,7 @@
                             <div class="insight-title strength">High-Performing Trainers</div>
                             <div class="insight-text">
                                 ${highPerformers.length} trainer${highPerformers.length !== 1 ? 's' : ''} at this site 
-                                ${highPerformers.length !== 1 ? 'are' : 'is'} performing at Exceptional levels (6.5+):
+                                ${highPerformers.length !== 1 ? 'are' : 'is'} performing at Model levels (>4.49):
                                 <strong>${highPerformers.map(t => t.trainer_name).join(', ')}</strong>.
                                 ${highPerformers.length > 1 ? 'These trainers can support others at the site.' : 'This trainer can serve as a model for others.'}
                             </div>
