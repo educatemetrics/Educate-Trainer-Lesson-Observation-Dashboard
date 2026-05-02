@@ -229,6 +229,204 @@
             .tab { padding: 6px 12px; font-size: 12px; }
             .tab-content { padding: 12px; }
         }
+        
+        /* Mobile-Friendly Table Styles */
+        @media (max-width: 768px) {
+            /* Make tables horizontally scrollable on mobile */
+            .section table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .section table th,
+            .section table td {
+                padding: 8px !important;
+                font-size: 12px !important;
+            }
+            
+            /* Compact comparison cards on mobile */
+            .comparison-card {
+                padding: 12px !important;
+            }
+            
+            .comparison-icon {
+                font-size: 20px !important;
+            }
+            
+            .comparison-label {
+                font-size: 11px !important;
+            }
+            
+            .comparison-main-score {
+                font-size: 20px !important;
+            }
+            
+            .comparison-vs {
+                font-size: 12px !important;
+            }
+            
+            .comparison-compare-score {
+                font-size: 16px !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            /* Ultra-compact table on small phones */
+            .section table th,
+            .section table td {
+                padding: 6px !important;
+                font-size: 11px !important;
+            }
+            
+            /* Hide less critical columns on very small screens */
+            .section table th:nth-child(4),
+            .section table td:nth-child(4) {
+                display: none; /* Hide Lesson column on tiny screens */
+            }
+            
+            /* Make rating badges smaller */
+            .section table td span {
+                padding: 2px 8px !important;
+                font-size: 10px !important;
+            }
+        }
+        
+        /* Tablet optimization (768px - 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .stats-grid { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 16px;
+            }
+            
+            .comparison-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .main-container {
+                flex-direction: row;
+            }
+            
+            .sidebar {
+                width: 300px;
+                max-height: calc(100vh - 200px);
+            }
+        }
+        
+        /* Touch-friendly styles for all mobile devices */
+        @media (hover: none) and (pointer: coarse) {
+            /* Increase touch targets */
+            .trainer-card,
+            .tab,
+            button,
+            select {
+                min-height: 44px; /* iOS recommended touch target */
+            }
+            
+            .tab {
+                padding: 12px 16px;
+            }
+            
+            /* Larger clickable areas */
+            .trainer-card {
+                padding: 14px;
+                margin-bottom: 10px;
+            }
+            
+            /* Remove hover effects on touch devices */
+            .trainer-card:hover,
+            .tab:hover {
+                transform: none;
+            }
+        }
+        
+        /* Landscape mode on mobile */
+        @media (max-width: 968px) and (orientation: landscape) {
+            .sidebar {
+                max-height: 200px;
+            }
+            
+            .main-container {
+                min-height: calc(100vh - 150px);
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            .sidebar,
+            .filter-bar,
+            .tabs,
+            button {
+                display: none !important;
+            }
+            
+            .main-panel {
+                width: 100%;
+                padding: 0;
+            }
+            
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+        
+        /* Mobile Card Layout for Observation Table */
+        @media (max-width: 600px) {
+            .observation-table-desktop {
+                display: none; /* Hide table on mobile */
+            }
+            
+            .observation-card-mobile {
+                display: block; /* Show cards on mobile */
+            }
+        }
+        
+        @media (min-width: 601px) {
+            .observation-table-desktop {
+                display: block; /* Show table on desktop/tablet */
+            }
+            
+            .observation-card-mobile {
+                display: none; /* Hide cards on desktop/tablet */
+            }
+        }
+        
+        .observation-card {
+            background: #1a2730;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #4D889D;
+        }
+        
+        .observation-card-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #0e313e;
+        }
+        
+        .observation-card-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .observation-card-label {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .observation-card-value {
+            font-size: 14px;
+            color: #e2e8f0;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -309,7 +507,7 @@
     
     <script>
         // ==================== APPS SCRIPT CONFIGURATION ====================
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxKhsB3zKXr8IPcbA4u_3GEWONsZ5AwmvEicybrdNicl_K7jsvEIHLzhKwhEv9JkpLd/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwI5LOFzZvg7LFYY0CPL_Qj7q3sriLNTDMP8euoClRvNRSxR5tLtkf5omRsw4rf0pXa/exec';
         
         // Global data object - will be populated from Google Sheets via Apps Script
         let DEMO_DATA = {
@@ -621,14 +819,23 @@
 
         // Select Trainer
         function selectTrainer(trainerId) {
+            console.log('selectTrainer called with:', trainerId);
             state.level = 'trainer';
             state.selectedTrainer = trainerId;
             state.activeTab = 'overview';
             
+            console.log('State updated:', state);
+            
             updateHeaderStats();
             renderBreadcrumb();
+            renderTrainerList(); // Update left panel to show selection
             renderView();
+            
+            console.log('View rendered');
         }
+        
+        // Make selectTrainer globally accessible
+        window.selectTrainer = selectTrainer;
 
         // Select Level
         function selectLevel(level) {
@@ -767,17 +974,27 @@
 
         // Render View
         function renderView() {
+            console.log('renderView called, state.level:', state.level);
+            console.log('state.selectedTrainer:', state.selectedTrainer);
+            
             const panel = document.getElementById('main-panel');
+            console.log('main-panel element found:', !!panel);
             
             if (state.level === 'program') {
+                console.log('Rendering program view');
                 panel.innerHTML = renderProgramView();
             } else if (state.level === 'district') {
+                console.log('Rendering district view');
                 panel.innerHTML = renderDistrictView();
             } else if (state.level === 'site') {
+                console.log('Rendering site view');
                 panel.innerHTML = renderSiteView();
             } else if (state.level === 'trainer') {
+                console.log('Rendering trainer view');
                 panel.innerHTML = renderTrainerView();
             }
+            
+            console.log('View rendered successfully');
         }
 
         // Render Program View
@@ -814,33 +1031,38 @@
         // (This file is getting long - shall I continue with the full implementation?)
 
         function getScoreColor(score) {
-            if (score <= 1.49) return 'critical';
-            if (score <= 2.49) return 'needs-improvement';
-            if (score <= 3.49) return 'basic';
-            if (score <= 4.49) return 'competent';
-            return 'model';
+            if (score < 2.0) return 'critical';          // <2.0: Insufficient
+            if (score < 3.0) return 'needs-improvement'; // 2.0-2.99: Weak
+            if (score < 3.8) return 'basic';             // 3.0-3.79: Adequate
+            if (score < 4.6) return 'competent';         // 3.8-4.59: Strong
+            return 'model';                               // 4.6-5.0: Exceptional
         }
 
         function getScoreLabel(score) {
-            if (score <= 1.49) return 'Requires Critical Development';
-            if (score <= 2.49) return 'Needs Significant Improvement';
-            if (score <= 3.49) return 'Meets Basic Expectations';
-            if (score <= 4.49) return 'Meets Expectations Consistently';
-            return 'Model Performance';
+            if (score < 2.0) return 'Insufficient';
+            if (score < 3.0) return 'Weak';
+            if (score < 3.8) return 'Adequate';
+            if (score < 4.6) return 'Strong';
+            return 'Exceptional';
         }
         
         function getScoreDescription(score) {
-            if (score <= 1.49) return 'The trainer requires critical development';
-            if (score <= 2.49) return 'The trainer needs significant improvement';
-            if (score <= 3.49) return 'Trainer meets basic expectations with room for improvement';
-            if (score <= 4.49) return 'The trainer meets expectations consistently; demonstrates solid competence';
-            return 'The trainer demonstrates model performance and can keep it up';
+            if (score < 2.0) return 'Does not meet expectations; critical development required';
+            if (score < 3.0) return 'Below expectations; significant improvement needed';
+            if (score < 3.8) return 'Meets basic expectations with room for improvement';
+            if (score < 4.6) return 'Meets expectations consistently; demonstrates solid competence';
+            return 'Exceeds expectations; demonstrates mastery and innovation';
         }
 
         function switchTab(tab) {
+            console.log('switchTab called with:', tab);
             state.activeTab = tab;
+            console.log('Active tab set to:', state.activeTab);
             renderView();
         }
+        
+        // Make switchTab globally accessible
+        window.switchTab = switchTab;
 
         // Placeholder functions - will implement all views
         function renderProgramOverview() {
@@ -850,15 +1072,15 @@
             // Calculate distribution based on new rubric
             const trainers = DEMO_DATA.trainers;
             const distribution = {
-                model: trainers.filter(t => t.stats.average_score > 4.49).length,
-                competent: trainers.filter(t => t.stats.average_score > 3.49 && t.stats.average_score <= 4.49).length,
-                basic: trainers.filter(t => t.stats.average_score > 2.49 && t.stats.average_score <= 3.49).length,
-                needsImprovement: trainers.filter(t => t.stats.average_score > 1.49 && t.stats.average_score <= 2.49).length,
-                critical: trainers.filter(t => t.stats.average_score <= 1.49).length
+                model: trainers.filter(t => t.stats.average_score >= 4.6).length,           // 4.6-5.0: Exceptional
+                competent: trainers.filter(t => t.stats.average_score >= 3.8 && t.stats.average_score < 4.6).length,  // 3.8-4.59: Strong
+                basic: trainers.filter(t => t.stats.average_score >= 3.0 && t.stats.average_score < 3.8).length,      // 3.0-3.79: Adequate
+                needsImprovement: trainers.filter(t => t.stats.average_score >= 2.0 && t.stats.average_score < 3.0).length, // 2.0-2.99: Weak
+                critical: trainers.filter(t => t.stats.average_score < 2.0).length                                      // <2.0: Insufficient
             };
             
-            // Trainers needing support (≤3.49 - Basic or below)
-            const trainersNeedingSupport = trainers.filter(t => t.stats.average_score <= 3.49)
+            // Trainers needing support (<3.8 - Adequate or below)
+            const trainersNeedingSupport = trainers.filter(t => t.stats.average_score < 3.8)
                 .sort((a, b) => a.stats.average_score - b.stats.average_score); // Lowest scores first
             
             const total = trainers.length;
@@ -1194,7 +1416,7 @@
                         <p style="color: #cbd5e1;">
                             The <strong>E!BA Bootcamp program</strong> comprises <strong>${trainers.length} trainers</strong> across 
                             <strong>${DEMO_DATA.program.districts} districts</strong>, with <strong>${DEMO_DATA.program.observations} total observations</strong> 
-                            conducted from November 25 to December 15, 2025.
+                            conducted from April 01 to December 15, 2026.
                         </p>
                         <p style="color: #cbd5e1; margin-top: 12px;">
                             The program average is <strong class="score-${getScoreColor(programAvg)}">${programAvg.toFixed(2)}/5.0 (${getScoreLabel(programAvg)})</strong>.
@@ -1403,11 +1625,11 @@
         function renderDistrictOverview(district, districtTrainers) {
             // Distribution based on E!BA rubric
             const distribution = {
-                model: districtTrainers.filter(t => t.stats.average_score > 4.49).length,
-                competent: districtTrainers.filter(t => t.stats.average_score > 3.49 && t.stats.average_score <= 4.49).length,
-                basic: districtTrainers.filter(t => t.stats.average_score > 2.49 && t.stats.average_score <= 3.49).length,
-                needsImprovement: districtTrainers.filter(t => t.stats.average_score > 1.49 && t.stats.average_score <= 2.49).length,
-                critical: districtTrainers.filter(t => t.stats.average_score <= 1.49).length
+                model: districtTrainers.filter(t => t.stats.average_score >= 4.6).length,           // 4.6-5.0: Exceptional
+                competent: districtTrainers.filter(t => t.stats.average_score >= 3.8 && t.stats.average_score < 4.6).length,  // 3.8-4.59: Strong
+                basic: districtTrainers.filter(t => t.stats.average_score >= 3.0 && t.stats.average_score < 3.8).length,      // 3.0-3.79: Adequate
+                needsImprovement: districtTrainers.filter(t => t.stats.average_score >= 2.0 && t.stats.average_score < 3.0).length, // 2.0-2.99: Weak
+                critical: districtTrainers.filter(t => t.stats.average_score < 2.0).length                                      // <2.0: Insufficient
             };
             
             const total = districtTrainers.length;
@@ -1750,7 +1972,7 @@
 
         function renderDistrictInsights(district, districtTrainers, programAvg) {
             const needsAttention = districtTrainers.filter(t => t.stats.average_score <= 3.49);
-            const highPerformers = districtTrainers.filter(t => t.stats.average_score > 4.49);
+            const highPerformers = districtTrainers.filter(t => t.stats.average_score >= 4.6);
             
             return `
                 <div class="section">
@@ -1913,11 +2135,11 @@
         function renderSiteOverview(site, siteTrainers) {
             // Distribution based on E!BA rubric
             const distribution = {
-                model: siteTrainers.filter(t => t.stats.average_score > 4.49).length,
-                competent: siteTrainers.filter(t => t.stats.average_score > 3.49 && t.stats.average_score <= 4.49).length,
-                basic: siteTrainers.filter(t => t.stats.average_score > 2.49 && t.stats.average_score <= 3.49).length,
-                needsImprovement: siteTrainers.filter(t => t.stats.average_score > 1.49 && t.stats.average_score <= 2.49).length,
-                critical: siteTrainers.filter(t => t.stats.average_score <= 1.49).length
+                model: siteTrainers.filter(t => t.stats.average_score >= 4.6).length,           // 4.6-5.0: Exceptional
+                competent: siteTrainers.filter(t => t.stats.average_score >= 3.8 && t.stats.average_score < 4.6).length,  // 3.8-4.59: Strong
+                basic: siteTrainers.filter(t => t.stats.average_score >= 3.0 && t.stats.average_score < 3.8).length,      // 3.0-3.79: Adequate
+                needsImprovement: siteTrainers.filter(t => t.stats.average_score >= 2.0 && t.stats.average_score < 3.0).length, // 2.0-2.99: Weak
+                critical: siteTrainers.filter(t => t.stats.average_score < 2.0).length                                      // <2.0: Insufficient
             };
             
             return `
@@ -2261,7 +2483,7 @@
 
         function renderSiteInsights(site, siteTrainers) {
             const needsAttention = siteTrainers.filter(t => t.stats.average_score <= 3.49);
-            const highPerformers = siteTrainers.filter(t => t.stats.average_score > 4.49);
+            const highPerformers = siteTrainers.filter(t => t.stats.average_score >= 4.6);
             const district = DEMO_DATA.districts.find(d => d.name === site.district);
             const districtAvg = district ? district.average : DEMO_DATA.program.average;
             
@@ -2471,29 +2693,38 @@
                 concerns.push('Performance declining over time - REQUIRES ATTENTION');
             }
             
-            if (avgScore < 3.5) {
-                concerns.push(`Overall performance below target (${avgScore.toFixed(2)}/5.0)`);
+            if (avgScore < 3.8) {
+                concerns.push(`Overall performance below Strong level (${avgScore.toFixed(2)}/5.0)`);
             }
             
-            // Generate action plan
+            // Generate action plan based on new rating scale
             const actionPlan = [];
             
-            if (avgScore < 3.0) {
+            if (avgScore < 2.0) {
+                // Insufficient (<2.0) - CRITICAL
+                actionPlan.push('CRITICAL: Immediate intervention required - daily support');
+                actionPlan.push('Emergency coaching plan with program leadership');
+                actionPlan.push('Consider temporary removal from solo teaching duties');
+            } else if (avgScore < 3.0) {
+                // Weak (2.0-2.99) - IMMEDIATE action needed
                 actionPlan.push('IMMEDIATE: Schedule intensive one-on-one coaching session this week');
                 actionPlan.push('Pair with high-performing mentor trainer for job shadowing');
                 actionPlan.push('Conduct daily lesson plan reviews before sessions');
-            } else if (avgScore < 3.5) {
+            } else if (avgScore < 3.8) {
+                // Adequate (3.0-3.79) - Significant support needed
                 actionPlan.push('Schedule weekly coaching sessions for next 4 weeks');
                 actionPlan.push('Focus on lowest-scoring competencies through targeted practice');
                 actionPlan.push('Observe high-performing trainers in action');
-            } else if (avgScore >= 4.5) {
-                actionPlan.push('Leverage as peer mentor for developing trainers');
-                actionPlan.push('Consider for leadership development opportunities');
-                actionPlan.push('Share best practices in trainer meetings');
+            } else if (avgScore < 4.6) {
+                // Strong (3.8-4.59) - Maintain and refine
+                actionPlan.push('Maintain strong performance and refine teaching techniques');
+                actionPlan.push('Continue professional development in specialized areas');
+                actionPlan.push('Ready for peer observation or co-teaching opportunities');
             } else {
-                actionPlan.push('Continue regular observation and feedback cycle');
-                actionPlan.push('Strengthen specific competency areas identified above');
-                actionPlan.push('Encourage peer learning and collaboration');
+                // Exceptional (4.6-5.0) - Leverage as leader
+                actionPlan.push('Exceptional performance - leverage as peer mentor');
+                actionPlan.push('Consider for leadership development and trainer-of-trainers program');
+                actionPlan.push('Share best practices in professional learning communities');
             }
             
             // Add competency-specific actions
@@ -2693,6 +2924,98 @@
                 </div>
                 
                 <div class="section">
+                    <h3 class="section-title">📋 Observation History</h3>
+                    
+                    <!-- Desktop/Tablet Table View -->
+                    <div class="observation-table-desktop" style="background: #0e313e; border-radius: 8px; overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+                            <thead>
+                                <tr style="background: #1a2730; border-bottom: 2px solid #4D889D;">
+                                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: #F1A01B;">#</th>
+                                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: #F1A01B;">Date</th>
+                                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: #F1A01B;">Observer</th>
+                                    <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: #F1A01B;">Lesson</th>
+                                    <th style="padding: 12px; text-align: center; font-size: 12px; font-weight: 600; color: #F1A01B;">Score</th>
+                                    <th style="padding: 12px; text-align: center; font-size: 12px; font-weight: 600; color: #F1A01B;">Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${trainer.observations.length === 0 ? `
+                                    <tr>
+                                        <td colspan="6" style="padding: 40px; text-align: center; color: #94a3b8;">
+                                            <div style="font-size: 48px; margin-bottom: 12px;">📋</div>
+                                            <div>No observations recorded yet</div>
+                                        </td>
+                                    </tr>
+                                ` : trainer.observations
+                                    .sort((a, b) => new Date(a.date) - new Date(b.date))
+                                    .map((obs, index) => `
+                                        <tr style="border-bottom: 1px solid #1a2730;">
+                                            <td style="padding: 12px; color: #94a3b8; font-size: 13px;">${index + 1}</td>
+                                            <td style="padding: 12px; color: #e2e8f0; font-size: 13px; white-space: nowrap;">${obs.date || 'N/A'}</td>
+                                            <td style="padding: 12px; color: #e2e8f0; font-size: 13px;">${obs.observer || 'N/A'}</td>
+                                            <td style="padding: 12px; color: #e2e8f0; font-size: 13px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${obs.lesson || 'N/A'}</td>
+                                            <td style="padding: 12px; text-align: center; font-size: 14px; font-weight: 600;" class="score-${getScoreColor(obs.overall_score)}">${obs.overall_score ? obs.overall_score.toFixed(2) : 'N/A'}</td>
+                                            <td style="padding: 12px; text-align: center;">
+                                                <span style="padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; background: ${getScoreColor(obs.overall_score) === 'critical' ? '#A0343420' : getScoreColor(obs.overall_score) === 'needs-improvement' ? '#ef444420' : getScoreColor(obs.overall_score) === 'basic' ? '#f59e0b20' : getScoreColor(obs.overall_score) === 'competent' ? '#eab30820' : '#4F926220'}; color: ${getScoreColor(obs.overall_score) === 'critical' ? '#A03434' : getScoreColor(obs.overall_score) === 'needs-improvement' ? '#ef4444' : getScoreColor(obs.overall_score) === 'basic' ? '#f59e0b' : getScoreColor(obs.overall_score) === 'competent' ? '#eab308' : '#4F9262'};">
+                                                    ${getScoreLabel(obs.overall_score)}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Mobile Card View -->
+                    <div class="observation-card-mobile">
+                        ${trainer.observations.length === 0 ? `
+                            <div style="background: #0e313e; padding: 40px; text-align: center; color: #94a3b8; border-radius: 8px;">
+                                <div style="font-size: 48px; margin-bottom: 12px;">📋</div>
+                                <div>No observations recorded yet</div>
+                            </div>
+                        ` : trainer.observations
+                            .sort((a, b) => new Date(a.date) - new Date(b.date))
+                            .map((obs, index) => `
+                                <div class="observation-card" style="border-left-color: ${getScoreColor(obs.overall_score) === 'critical' ? '#A03434' : getScoreColor(obs.overall_score) === 'needs-improvement' ? '#ef4444' : getScoreColor(obs.overall_score) === 'basic' ? '#f59e0b' : getScoreColor(obs.overall_score) === 'competent' ? '#eab308' : '#4F9262'};">
+                                    <div class="observation-card-row">
+                                        <span class="observation-card-label">#</span>
+                                        <span class="observation-card-value">${index + 1}</span>
+                                    </div>
+                                    <div class="observation-card-row">
+                                        <span class="observation-card-label">Date</span>
+                                        <span class="observation-card-value">${obs.date || 'N/A'}</span>
+                                    </div>
+                                    <div class="observation-card-row">
+                                        <span class="observation-card-label">Observer</span>
+                                        <span class="observation-card-value">${obs.observer || 'N/A'}</span>
+                                    </div>
+                                    <div class="observation-card-row">
+                                        <span class="observation-card-label">Lesson</span>
+                                        <span class="observation-card-value" style="text-align: right; max-width: 60%;">${obs.lesson || 'N/A'}</span>
+                                    </div>
+                                    <div class="observation-card-row">
+                                        <span class="observation-card-label">Score</span>
+                                        <span class="observation-card-value score-${getScoreColor(obs.overall_score)}" style="font-weight: 700; font-size: 16px;">
+                                            ${obs.overall_score ? obs.overall_score.toFixed(2) : 'N/A'}
+                                        </span>
+                                    </div>
+                                    <div class="observation-card-row">
+                                        <span class="observation-card-label">Rating</span>
+                                        <span style="padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; background: ${getScoreColor(obs.overall_score) === 'critical' ? '#A0343420' : getScoreColor(obs.overall_score) === 'needs-improvement' ? '#ef444420' : getScoreColor(obs.overall_score) === 'basic' ? '#f59e0b20' : getScoreColor(obs.overall_score) === 'competent' ? '#eab30820' : '#4F926220'}; color: ${getScoreColor(obs.overall_score) === 'critical' ? '#A03434' : getScoreColor(obs.overall_score) === 'needs-improvement' ? '#ef4444' : getScoreColor(obs.overall_score) === 'basic' ? '#f59e0b' : getScoreColor(obs.overall_score) === 'competent' ? '#eab308' : '#4F9262'};">
+                                            ${getScoreLabel(obs.overall_score)}
+                                        </span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                    </div>
+                    
+                    <div style="margin-top: 12px; font-size: 12px; color: #94a3b8;">
+                        Total Observations: ${trainer.observations.length} • Average Score: ${trainer.stats.average_score.toFixed(2)}/5.0
+                    </div>
+                </div>
+                
+                <div class="section">
                     <h3 class="section-title">📈 Competency Comparison vs Program</h3>
                     ${Object.entries(trainer.stats.competencies).map(([comp, score]) => {
                         // Calculate program average for this competency
@@ -2831,7 +3154,8 @@
                         <strong>TRAJECTORY:</strong> ${
                             scoreChange > 0.2 ? `Positive growth of +${scoreChange.toFixed(2)} points - strong momentum` :
                             scoreChange < -0.2 ? `Moderate decline of ${scoreChange.toFixed(2)} points - monitor closely` :
-                            'Stable performance - maintain consistency'
+                            trainer.stats.average_score >= 3.8 ? 'Stable performance - maintain strong competence' : 
+                            'Stable performance - address gaps to achieve professional mastery'
                         }
                     </div>
                 </div>
