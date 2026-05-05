@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trainer Performance Dashboard - Educate!</title>
+    <title>E!BA Lesson Observation Toolkit - Educate!</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: system-ui, -apple-system, sans-serif; background: #0e313e; color: #e2e8f0; min-height: 100vh; }
@@ -431,9 +431,63 @@
 </head>
 <body>
     
+    <!-- Login Screen -->
+    <div id="login-screen" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0e313e 0%, #1a2730 100%);">
+        <div style="background: #1a2730; padding: 40px; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); border: 1px solid #4D889D; max-width: 400px; width: 90%;">
+            <div style="text-align: center; margin-bottom: 32px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🔐</div>
+                <h1 style="color: #F1A01B; font-size: 28px; margin-bottom: 8px;">E!BA Dashboard</h1>
+                <p style="color: #94a3b8; font-size: 14px;">E!BA Lesson Observation Toolkit</p>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; color: #94a3b8; font-size: 13px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;">Password</label>
+                <input type="password" id="login-password" placeholder="Enter password" 
+                       onkeypress="if(event.key === 'Enter') attemptLogin()"
+                       style="width: 100%; padding: 14px 16px; background: #0e313e; border: 2px solid #4D889D; border-radius: 8px; color: #e2e8f0; font-size: 16px; transition: all 0.2s;"
+                       onfocus="this.style.borderColor='#F1A01B'"
+                       onblur="this.style.borderColor='#4D889D'">
+            </div>
+            
+            <div id="login-error" style="display: none; background: #ef444420; border: 1px solid #ef4444; color: #ef4444; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; text-align: center;">
+                ❌ Incorrect password. Please try again.
+            </div>
+            
+            <button onclick="attemptLogin()" 
+                    style="width: 100%; padding: 14px; background: #F1A01B; color: #0e313e; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; transition: all 0.2s; margin-bottom: 16px;"
+                    onmouseover="this.style.background='#d89419'"
+                    onmouseout="this.style.background='#F1A01B'">
+                Sign In
+            </button>
+            
+            <button onclick="openObservationManual()" 
+                    style="width: 100%; padding: 14px; background: transparent; color: #4F9262; border: 2px solid #4F9262; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px;"
+                    onmouseover="this.style.background='#4F926220'"
+                    onmouseout="this.style.background='transparent'">
+                <span style="font-size: 20px;">📖</span>
+                <span>E!BA Lesson Observation Manual</span>
+            </button>
+            
+            <button onclick="openCurriculum()" 
+                    style="width: 100%; padding: 14px; background: transparent; color: #F1A01B; border: 2px solid #F1A01B; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                    onmouseover="this.style.background='#F1A01B20'"
+                    onmouseout="this.style.background='transparent'">
+                <span style="font-size: 20px;">📚</span>
+                <span>View E!BA Curriculum</span>
+            </button>
+            
+            <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #4D889D; text-align: center; color: #64748b; font-size: 12px;">
+                <p>Educate! Uganda • E!BA Bootcamp 2026</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Dashboard (hidden until login) -->
+    <div id="main-dashboard" style="display: none;">
+    
     <div class="header">
         <div>
-            <h1>Trainer Performance Dashboard</h1>
+            <h1>E!BA Lesson Observation Toolkit</h1>
             <div class="header-subtitle">E!BA Bootcamp • Educate! Uganda</div>
         </div>
         <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
@@ -453,6 +507,18 @@
                 <span style="font-size: 18px;">📝</span>
                 <span>Lesson Observation Form</span>
             </button>
+            
+            <!-- Download CSV Button (only for supervisor) -->
+            <button id="download-csv-btn" onclick="downloadTrainerCSV()" style="display: none; padding: 12px 24px; background: #0F6A8C; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s;">
+                <span style="font-size: 18px;">📥</span>
+                <span>Download CSV</span>
+            </button>
+            
+            <!-- Logout Button -->
+            <button onclick="logout()" style="padding: 12px 20px; background: transparent; color: #ef4444; border: 1px solid #ef4444; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s;">
+                🚪 Logout
+            </button>
+            
             <div class="header-stats" id="header-stats"></div>
         </div>
     </div>
@@ -507,7 +573,7 @@
     
     <script>
         // ==================== APPS SCRIPT CONFIGURATION ====================
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwI5LOFzZvg7LFYY0CPL_Qj7q3sriLNTDMP8euoClRvNRSxR5tLtkf5omRsw4rf0pXa/exec';
+        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwRJABEJex38ayuNsZS_udM4cg0_tQnlBHZr-MjlkirvYOvv65QNkSM5FDJGu-H74XU/exec';
         
         // Global data object - will be populated from Google Sheets via Apps Script
         let DEMO_DATA = {
@@ -3043,40 +3109,6 @@
                     }).join('')}
                 </div>
                 
-                <div class="section">
-                    <h3 class="section-title">🏆 Ranking</h3>
-                    ${(() => {
-                        const allTrainers = DEMO_DATA.trainers.sort((a, b) => b.stats.average_score - a.stats.average_score);
-                        const rank = allTrainers.findIndex(t => t.trainer_id === trainer.trainer_id) + 1;
-                        const percentile = ((DEMO_DATA.trainers.length - rank) / DEMO_DATA.trainers.length * 100).toFixed(0);
-                        
-                        return `
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-                                <div style="background: #0e313e; padding: 20px; border-radius: 8px; text-align: center;">
-                                    <div style="font-size: 32px; font-weight: bold; color: ${rank <= 3 ? '#fbbf24' : '#F1A01B'};">
-                                        #${rank}
-                                    </div>
-                                    <div style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Program Rank</div>
-                                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">out of ${DEMO_DATA.trainers.length}</div>
-                                </div>
-                                <div style="background: #0e313e; padding: 20px; border-radius: 8px; text-align: center;">
-                                    <div style="font-size: 32px; font-weight: bold; color: #F1A01B;">
-                                        ${percentile}%
-                                    </div>
-                                    <div style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Percentile</div>
-                                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">top ${percentile}%</div>
-                                </div>
-                                <div style="background: #0e313e; padding: 20px; border-radius: 8px; text-align: center;">
-                                    <div style="font-size: 24px; font-weight: bold; color: ${trainer.stats.trend === 'improving' ? '#4F9262' : trainer.stats.trend === 'declining' ? '#ef4444' : '#94a3b8'};">
-                                        ${trainer.stats.trend === 'improving' ? '📈' : trainer.stats.trend === 'declining' ? '📉' : '➡️'}
-                                    </div>
-                                    <div style="font-size: 12px; color: #94a3b8; margin-top: 8px;">Trend</div>
-                                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">${trainer.stats.trend}</div>
-                                </div>
-                            </div>
-                        `;
-                    })()}
-                </div>
             `;
         }
 
@@ -3145,7 +3177,6 @@
                         <strong>${trainer.trainer_name}</strong> is a ${trainer.trainer_gender} trainer at <strong>${trainer.training_site}</strong> in <strong>${trainer.district_name}</strong>. 
                         Based on <strong>${trainer.stats.observation_count} observations</strong>, their overall average is <strong class="score-${getScoreColor(trainer.stats.average_score)}">${trainer.stats.average_score.toFixed(2)}/5.0 (${getScoreLabel(trainer.stats.average_score)})</strong>. 
                         <em style="color: #94a3b8;">${getScoreDescription(trainer.stats.average_score)}.</em>
-                        They rank <strong>#${districtRank} of ${districtTrainers.length} trainers</strong> in ${trainer.district_name}.
                         <br><br>
                         <strong>KEY STRENGTHS:</strong> ${topComps.map(([name, score]) => `${score.toFixed(1)} in ${name}`).join(' and ')}.
                         <br>
@@ -3585,9 +3616,473 @@ Common Issues:
             );
         }
 
-        // Initialize
-        init();
-        renderTrainerList();
+        // Open E!BA Curriculum in new window
+        function openCurriculum() {
+            const curriculumUrl = 'https://drive.google.com/file/d/1DQxZSXBqOCPrZAiEZDIsRC5KtDBt6Ic3/view?usp=sharing';
+            
+            // Open in new window with specific dimensions
+            const width = 1200;
+            const height = 800;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            
+            window.open(
+                curriculumUrl,
+                'EBACurriculum',
+                `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=yes,status=yes`
+            );
+        }
+
+        // Open E!BA Lesson Observation Manual in new window
+        function openObservationManual() {
+            const manualUrl = 'https://docs.google.com/document/d/12dlQ7eF2Datr1yV9sLJrJQUIdW34ZDlgxEN97y8q8No/edit?tab=t.0';
+            
+            // Open in new window with specific dimensions
+            const width = 1200;
+            const height = 800;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            
+            window.open(
+                manualUrl,
+                'EBAObservationManual',
+                `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,toolbar=yes,menubar=no,location=yes,status=yes`
+            );
+        }
+
+        // ==================== PASSWORD PROTECTION ====================
+        
+        // Role definitions - Supervisor, Viewer, and PO roles
+        const USER_ROLES = {
+            // Supervisor - Full access, can download CSV
+            supervisor: {
+                password: 'eba2026supervisor',
+                role: 'supervisor',
+                sites: 'all',  // Access to all sites
+                canDownload: true
+            },
+            
+            // Viewer - Full access, cannot download CSV
+            viewer: {
+                password: 'eba2026viewer',
+                role: 'viewer',
+                sites: 'all',  // Access to all sites
+                canDownload: false
+            },
+            
+            // Program Officers - Site-specific access (treated as viewers with site restrictions)
+            
+            // PO 1 - Damali Nambogwe (Bugweri)
+            po1: {
+                password: 'Damali1',
+                role: 'po',
+                sites: [
+                    'Mukyigi hall',
+                    'Lady Agnes nursery and primary school',
+                    'Trust Junior School',
+                    'Busembatia Modle primary school',
+                    'Bulunguli Seed School',
+                    'Bumoozi Primary School'
+                ],
+                poName: 'Damali Nambogwe',
+                canDownload: false
+            },
+            
+            // PO 2 - Annliz Nyakato (Bugweri)
+            po2: {
+                password: 'Annliz2',
+                role: 'po',
+                sites: [
+                    'Buyanga Primary School',
+                    'Newlife children center Primary school',
+                    'Bwigula Primary School',
+                    'Lubira Primary School'
+                ],
+                poName: 'Annliz Nyakato',
+                canDownload: false
+            },
+            
+            // PO 3 - Christine Nambi (Bugweri)
+            po3: {
+                password: 'Christine3',
+                role: 'po',
+                sites: [
+                    'Kalalu Primary School',
+                    'Butalango Primary School',
+                    'Bubonghe Kwagala Maize Milling Hall',
+                    'Idinda Primary school',
+                    'St paul Idinda church of uganda'
+                ],
+                poName: 'Christine Nambi',
+                canDownload: false
+            },
+            
+            // PO 4 - Gwina Samson (Bugweri & Bugiri)
+            po4: {
+                password: 'Gwina4',
+                role: 'po',
+                sites: [
+                    'Annahda islamic institute',
+                    'Bishop willigers secondary school',
+                    'Kirongo primary school',
+                    'Walugoma primary school',
+                    'Bright future primary school'
+                ],
+                poName: 'Gwina Samson',
+                canDownload: false
+            },
+            
+            // PO 5 - Umar Wafula (Bugiri)
+            po5: {
+                password: 'Umar5',
+                role: 'po',
+                sites: [
+                    'Bupala primary School - Bugiri',
+                    'Busoga Muslim primary school',
+                    'Butumba primary school',
+                    'Luwooko primary school',
+                    'Kayaigo primary school',
+                    'Bugombo primary school',
+                    'Bugubo primary school'
+                ],
+                poName: 'Umar Wafula',
+                canDownload: false
+            },
+            
+            // PO 6 - Akurut Shamim (Bugiri)
+            po6: {
+                password: 'Akurut6',
+                role: 'po',
+                sites: [
+                    'Nabukima primary school',
+                    'Nabukima church of God',
+                    'Nsono primary school',
+                    'Nawasenyu primary school',
+                    'Bugiri primary school'
+                ],
+                poName: 'Akurut Shamim',
+                canDownload: false
+            },
+            
+            // PO 7 - Nemwa Susan (Bugiri)
+            po7: {
+                password: 'Nemwa7',
+                role: 'po',
+                sites: [
+                    'Muyemu primary school',
+                    'Star light Nursary and primary school',
+                    'Bugunga primary school',
+                    'Butyabule primary school',
+                    'Nabuganga primary school'
+                ],
+                poName: 'Nemwa Susan',
+                canDownload: false
+            },
+            
+            // PO 8 - Guyu Meddie (Bugiri)
+            po8: {
+                password: 'Guyu8',
+                role: 'po',
+                sites: [
+                    'Kapyanga subcounty hall',
+                    'Nalubale secondary school',
+                    'Nkaiza Primary school',
+                    'UMURDA offices',
+                    'Ndifakulya primary school'
+                ],
+                poName: 'Guyu Meddie',
+                canDownload: false
+            }
+        };
+        
+        let currentUser = null;
+        
+        function attemptLogin() {
+            const passwordInput = document.getElementById('login-password');
+            const password = passwordInput.value;
+            const errorDiv = document.getElementById('login-error');
+            
+            // Find user by password
+            const userEntry = Object.entries(USER_ROLES).find(([key, user]) => user.password === password);
+            
+            if (userEntry) {
+                currentUser = userEntry[1];
+                currentUser.username = userEntry[0];
+                login();
+            } else {
+                // Show error
+                errorDiv.style.display = 'block';
+                passwordInput.value = '';
+                passwordInput.focus();
+                
+                // Shake animation
+                passwordInput.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    passwordInput.style.animation = '';
+                }, 500);
+            }
+        }
+        
+        function login() {
+            // Hide login screen
+            document.getElementById('login-screen').style.display = 'none';
+            
+            // Show main dashboard
+            document.getElementById('main-dashboard').style.display = 'block';
+            
+            // Show download button only for users with download permission
+            if (currentUser.canDownload) {
+                document.getElementById('download-csv-btn').style.display = 'flex';
+            }
+            
+            // Store login state in session (will expire when browser closes)
+            sessionStorage.setItem('eba_logged_in', 'true');
+            sessionStorage.setItem('eba_user_data', JSON.stringify(currentUser));
+            
+            // Apply site filtering for POs
+            if (currentUser.role === 'po') {
+                applySiteFilter();
+            }
+            
+            // Initialize dashboard
+            init();
+            renderTrainerList();
+            
+            console.log('Logged in as:', currentUser.role, currentUser.poName || '');
+        }
+        
+        function applySiteFilter() {
+            // Filter data to only show assigned sites
+            if (currentUser.sites !== 'all' && DEMO_DATA) {
+                // Filter trainers to only those at assigned sites
+                DEMO_DATA.trainers = DEMO_DATA.trainers.filter(trainer => 
+                    currentUser.sites.includes(trainer.training_site)
+                );
+                
+                // Filter sites list
+                DEMO_DATA.sites = DEMO_DATA.sites.filter(site => 
+                    currentUser.sites.includes(site.name)
+                );
+                
+                // Filter districts to only those with assigned sites
+                const assignedDistricts = [...new Set(DEMO_DATA.trainers.map(t => t.district_name))];
+                DEMO_DATA.districts = DEMO_DATA.districts.filter(district => 
+                    assignedDistricts.includes(district.name)
+                );
+                
+                // Recalculate program stats
+                if (DEMO_DATA.trainers.length > 0) {
+                    const allScores = DEMO_DATA.trainers.map(t => t.stats.average_score);
+                    DEMO_DATA.program.trainers = DEMO_DATA.trainers.length;
+                    DEMO_DATA.program.observations = DEMO_DATA.trainers.reduce((sum, t) => sum + t.stats.observation_count, 0);
+                    DEMO_DATA.program.average = parseFloat((allScores.reduce((a, b) => a + b, 0) / allScores.length).toFixed(2));
+                    DEMO_DATA.program.districts = DEMO_DATA.districts.length;
+                    DEMO_DATA.program.sites = DEMO_DATA.sites.length;
+                }
+                
+                console.log('Site filter applied. Showing', DEMO_DATA.sites.length, 'sites:', currentUser.sites);
+            }
+        }
+        
+        function logout() {
+            // Clear session
+            sessionStorage.removeItem('eba_logged_in');
+            sessionStorage.removeItem('eba_user_data');
+            currentUser = null;
+            
+            // Hide main dashboard
+            document.getElementById('main-dashboard').style.display = 'none';
+            
+            // Show login screen
+            document.getElementById('login-screen').style.display = 'flex';
+            
+            // Clear password field
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-error').style.display = 'none';
+            
+            // Reload page to reset filtered data
+            location.reload();
+        }
+        
+        // Check if already logged in (from session)
+        function checkLoginState() {
+            const isLoggedIn = sessionStorage.getItem('eba_logged_in');
+            const userData = sessionStorage.getItem('eba_user_data');
+            
+            if (isLoggedIn === 'true' && userData) {
+                currentUser = JSON.parse(userData);
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-dashboard').style.display = 'block';
+                
+                if (currentUser.canDownload) {
+                    document.getElementById('download-csv-btn').style.display = 'flex';
+                }
+                
+                // Apply site filter before initializing
+                if (currentUser.role === 'po') {
+                    // Need to wait for data to load
+                    const checkDataInterval = setInterval(() => {
+                        if (DEMO_DATA) {
+                            clearInterval(checkDataInterval);
+                            applySiteFilter();
+                            init();
+                            renderTrainerList();
+                        }
+                    }, 100);
+                } else {
+                    init();
+                    renderTrainerList();
+                }
+            }
+        }
+        
+        // ==================== CSV DOWNLOAD FUNCTION ====================
+        
+        function downloadTrainerCSV() {
+            if (!currentUser || !currentUser.canDownload) {
+                alert('Access denied. Only supervisors can download data.');
+                return;
+            }
+            
+            if (!DEMO_DATA || !DEMO_DATA.trainers) {
+                alert('No data available to download.');
+                return;
+            }
+            
+            // Prepare CSV data
+            const headers = [
+                'Trainer ID',
+                'Trainer Name',
+                'Gender',
+                'District',
+                'Site',
+                'Total Observations',
+                'Average Score',
+                'Performance Level',
+                'Correct Assessment Text',  // NEW: For validation
+                'Trend',
+                'Program Rank',
+                'District Rank',
+                'Site Rank',
+                // Competencies
+                'Pedagogical Content',
+                'Facilitation & Delivery',
+                'Entrepreneurship Mindset',
+                'Gender Responsive',
+                'Coaching & Mentoring',
+                'Language',
+                'Leadership',
+                // Comments
+                'Strengths Comments',
+                'Weakness Comments',
+                'Overall Comments'
+            ];
+            
+            // Sort trainers by average score (descending)
+            const sortedTrainers = [...DEMO_DATA.trainers].sort((a, b) => 
+                b.stats.average_score - a.stats.average_score
+            );
+            
+            // Calculate rankings
+            const programRankings = sortedTrainers.map((t, i) => ({
+                trainer_id: t.trainer_id,
+                rank: i + 1
+            }));
+            
+            // Prepare rows
+            const rows = sortedTrainers.map(trainer => {
+                // Get rankings
+                const programRank = programRankings.find(r => r.trainer_id === trainer.trainer_id).rank;
+                
+                const districtTrainers = sortedTrainers.filter(t => t.district_name === trainer.district_name);
+                const districtRank = districtTrainers.findIndex(t => t.trainer_id === trainer.trainer_id) + 1;
+                
+                const siteTrainers = sortedTrainers.filter(t => t.training_site === trainer.training_site);
+                const siteRank = siteTrainers.findIndex(t => t.trainer_id === trainer.trainer_id) + 1;
+                
+                // Extract comments
+                const strengthComments = trainer.all_comments
+                    ?.filter(c => c.type === 'strength')
+                    .map(c => c.text)
+                    .join(' | ') || '';
+                
+                const weaknessComments = trainer.all_comments
+                    ?.filter(c => c.type === 'weakness')
+                    .map(c => c.text)
+                    .join(' | ') || '';
+                
+                const overallComments = trainer.all_comments
+                    ?.filter(c => c.type === 'overall')
+                    .map(c => c.text)
+                    .join(' | ') || '';
+                
+                return [
+                    trainer.trainer_id,
+                    trainer.trainer_name,
+                    trainer.trainer_gender,
+                    trainer.district_name,
+                    trainer.training_site,
+                    trainer.stats.observation_count,
+                    trainer.stats.average_score.toFixed(2),
+                    getScoreLabel(trainer.stats.average_score),
+                    getScoreDescription(trainer.stats.average_score),  // NEW: Correct assessment text
+                    trainer.stats.trend.charAt(0).toUpperCase() + trainer.stats.trend.slice(1),
+                    programRank,
+                    districtRank,
+                    siteRank,
+                    // Competencies
+                    trainer.stats.competencies['Pedagogical Content'].toFixed(2),
+                    trainer.stats.competencies['Facilitation & Delivery'].toFixed(2),
+                    trainer.stats.competencies['Entrepreneurship Mindset'].toFixed(2),
+                    trainer.stats.competencies['Gender Responsive'].toFixed(2),
+                    trainer.stats.competencies['Coaching & Mentoring'].toFixed(2),
+                    trainer.stats.competencies['Language'].toFixed(2),
+                    trainer.stats.competencies['Leadership'].toFixed(2),
+                    // Comments (escape quotes)
+                    `"${strengthComments.replace(/"/g, '""')}"`,
+                    `"${weaknessComments.replace(/"/g, '""')}"`,
+                    `"${overallComments.replace(/"/g, '""')}"`
+                ];
+            });
+            
+            // Create CSV content
+            const csvContent = [
+                headers.join(','),
+                ...rows.map(row => row.join(','))
+            ].join('\n');
+            
+            // Create blob and download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const timestamp = new Date().toISOString().split('T')[0];
+            link.setAttribute('href', url);
+            link.setAttribute('download', `EBA_Trainer_Performance_${timestamp}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            console.log('CSV downloaded:', `EBA_Trainer_Performance_${timestamp}.csv`);
+        }
+
+        // Add shake animation for login error
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+                20%, 40%, 60%, 80% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Check login state on page load
+        checkLoginState();
     </script>
+    
+    </div> <!-- End of main-dashboard -->
 </body>
 </html>
